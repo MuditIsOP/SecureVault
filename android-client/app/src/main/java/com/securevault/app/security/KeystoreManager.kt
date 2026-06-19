@@ -111,8 +111,9 @@ object KeystoreManager {
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setRandomizedEncryptionRequired(true)
             .setUserAuthenticationRequired(true)
-            // Auth-per-operation: must authenticate freshly each decrypt call
-            .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG or
+            // 300-second window after device unlock — key usable for 5 min
+            // without requiring BiometricPrompt per operation
+            .setUserAuthenticationParameters(300, KeyProperties.AUTH_BIOMETRIC_STRONG or
                     KeyProperties.AUTH_DEVICE_CREDENTIAL)
             // Invalidate if new fingerprint enrolled — Security_Requirements.md §1 STRIDE
             .setInvalidatedByBiometricEnrollment(true)

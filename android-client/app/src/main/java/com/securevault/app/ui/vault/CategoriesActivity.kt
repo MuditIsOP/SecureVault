@@ -306,7 +306,7 @@ class CategoriesActivity : AppCompatActivity() {
         return withContext(Dispatchers.IO) {
             val db = com.securevault.app.data.DatabaseModule.provideDatabase(applicationContext)
             val cursor = db.openHelper.readableDatabase
-                .rawQuery("SELECT id FROM users LIMIT 1", null)
+                .query("SELECT id FROM users LIMIT 1")
             cursor.use {
                 if (it.moveToFirst()) it.getString(0) else ""
             }

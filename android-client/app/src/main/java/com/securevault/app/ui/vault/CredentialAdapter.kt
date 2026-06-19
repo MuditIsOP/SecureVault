@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.securevault.app.R
 import com.securevault.app.data.entities.PasswordEntity
 
@@ -40,6 +42,26 @@ class CredentialAdapter(
                 return oldItem == newItem
             }
         }
+
+        /**
+         * Extracts a clean domain from a URL for favicon fetching.
+         * "https://www.instagram.com/login" -> "instagram.com"
+         */
+        fun extractDomain(url: String?): String? {
+            if (url.isNullOrBlank()) return null
+            return try {
+                var domain = url.trim()
+                    .removePrefix("https://")
+                    .removePrefix("http://")
+                    .removePrefix("www.")
+                    .split("/")[0]
+                    .split("?")[0]
+                    .lowercase()
+                if (domain.contains(".")) domain else null
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CredentialViewHolder {
@@ -55,31 +77,50 @@ class CredentialAdapter(
     inner class CredentialViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tvAvatar: TextView = itemView.findViewById(R.id.tv_avatar)
+        private val ivFavicon: ImageView = itemView.findViewById(R.id.iv_favicon)
         private val tvName: TextView = itemView.findViewById(R.id.tv_credential_name)
         private val tvUsername: TextView = itemView.findViewById(R.id.tv_credential_username)
         private val ivFavoriteStar: ImageView = itemView.findViewById(R.id.iv_favorite_star)
 
         fun bind(credential: PasswordEntity) {
-            // PRD F-VAULT-01 AC#2 — Website/Entry Name
+            // Entry name
             tvName.text = credential.name
 
-            // PRD F-VAULT-01 AC#2 — Username/Email
+            // Username/Email
             tvUsername.text = credential.usernameEmail
 
-            // PRD F-VAULT-01 AC#2 — Letter fallback avatar
-            // First letter of the credential name, uppercase
+            // Letter fallback avatar — first letter uppercase
             val initial = credential.name.firstOrNull()?.uppercase() ?: "?"
             tvAvatar.text = initial
 
-            // PRD F-VAULT-01 AC#2 — Star (Favorite) indicator
+            // Favicon — try to load from Google's favicon API
+            val domain = extractDomain(credential.websiteUrl)
+            if (domain != null) {
+                ivFavicon.visibility = View.VISIBLE
+                ivFavicon.load("https://www.google.com/s2/favicons?domain=$domain&sz=128") {
+                    crossfade(true)
+                    transformations(CircleCropTransformation())
+                    listener(
+                        onSuccess = { _, _ -> tvAvatar.visibility = View.INVISIBLE },
+                        onError = { _, _ ->
+                            ivFavicon.visibility = View.GONE
+                            tvAvatar.visibility = View.VISIBLE
+                        }
+                    )
+                }
+            } else {
+                ivFavicon.visibility = View.GONE
+                tvAvatar.visibility = View.VISIBLE
+            }
+
+            // Favorite star
             ivFavoriteStar.visibility = if (credential.favorite == 1) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
 
-            // PRD F-VAULT-01 AC#3 — "Tapping a password entry card must navigate
-            // to the Password Details Screen."
+            // Navigate to details on tap
             itemView.setOnClickListener {
                 onItemClick(credential)
             }

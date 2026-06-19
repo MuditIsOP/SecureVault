@@ -187,13 +187,9 @@ class PinCreateActivity : AppCompatActivity() {
                     val db = DatabaseModule.provideDatabase(applicationContext)
                     val user = db.userDao().getUser()
                     if (user != null) {
+                        db.userDao().updatePin(user.id, pinHash)
                         if (isReset) {
-                            // Reset PIN in local DB and clear lockout/failures
-                            db.userDao().updatePin(user.id, pinHash)
-                            // Sync lockout reset with server
                             com.securevault.app.security.PINLockoutManager.resetLockoutState(applicationContext)
-                        } else {
-                            savePinHashToDatabase(pinHash)
                         }
                     }
                 }

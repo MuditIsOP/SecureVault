@@ -147,6 +147,12 @@ class SecurityQuestionActivity : AppCompatActivity() {
                 )
                 AuthApiService.setupSecurityQuestion(request)
 
+                // Save question text locally for future challenge screens
+                getSharedPreferences("securevault_prefs", MODE_PRIVATE)
+                    .edit()
+                    .putString("security_question_text", selectedQuestion)
+                    .apply()
+
                 // Navigate to PIN creation — SCR-ONB-03
                 val intent = Intent(this@SecurityQuestionActivity, PinCreateActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -154,10 +160,11 @@ class SecurityQuestionActivity : AppCompatActivity() {
                 finish()
             } catch (e: Exception) {
                 setLoadingState(false)
+                android.util.Log.e(TAG, "Security question setup failed", e)
                 // Screens.md SCR-ONB-02 Error state
                 Toast.makeText(
                     this@SecurityQuestionActivity,
-                    "Connection timed out. Please try again.",
+                    "Error: ${e.javaClass.simpleName} — ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -177,5 +184,3 @@ class SecurityQuestionActivity : AppCompatActivity() {
     }
 }
 
-/** Stub — implemented in task-006 */
-class PinCreateActivity : AppCompatActivity()

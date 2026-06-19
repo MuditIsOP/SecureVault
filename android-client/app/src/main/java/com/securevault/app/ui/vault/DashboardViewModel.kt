@@ -132,7 +132,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private suspend fun getCurrentUserId(): String {
         return withContext(Dispatchers.IO) {
             val cursor = db.openHelper.readableDatabase
-                .rawQuery("SELECT id FROM users LIMIT 1", null)
+                .query("SELECT id FROM users LIMIT 1")
             cursor.use {
                 if (it.moveToFirst()) it.getString(0) else ""
             }

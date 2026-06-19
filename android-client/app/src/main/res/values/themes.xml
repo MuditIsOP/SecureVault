@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme — Material 3 Dark -->
+    <!-- Design.md §2.1 — Dark theme tokens -->
+    <style name="Theme.SecureVault" parent="Theme.Material3.Dark.NoActionBar">
+
+        <!-- Primary colors — Design.md tokens -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorOnPrimary">@color/color_on_primary</item>
+        <item name="colorPrimaryContainer">#4F378B</item>
+        <item name="colorOnPrimaryContainer">#EADDFF</item>
+
+        <!-- Secondary colors -->
+        <item name="colorSecondary">@color/color_secondary</item>
+        <item name="colorOnSecondary">#332D41</item>
+        <item name="colorSecondaryContainer">#4A4458</item>
+        <item name="colorOnSecondaryContainer">#E8DEF8</item>
+
+        <!-- Surface colors — Design.md §2.1 -->
+        <item name="colorSurface">@color/color_surface</item>
+        <item name="colorOnSurface">@color/color_on_surface</item>
+        <item name="colorSurfaceVariant">@color/color_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/color_on_surface_variant</item>
+
+        <!-- Background — Design.md §2.1 #141218 -->
+        <item name="android:colorBackground">@color/color_background</item>
+        <item name="colorOnBackground">@color/color_on_surface</item>
+
+        <!-- Error colors -->
+        <item name="colorError">@color/color_error</item>
+        <item name="colorOnError">#601410</item>
+
+        <!-- Status bar / Navigation bar — dark -->
+        <item name="android:statusBarColor">@color/color_background</item>
+        <item name="android:navigationBarColor">@color/color_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Material 3 text fields -->
+        <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
+    </style>
+
+    <!-- Bottom sheet overlay — rounded corners, dark surface -->
+    <style name="ThemeOverlay.SecureVault.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.SecureVault.BottomSheet</item>
+    </style>
+
+    <style name="Widget.SecureVault.BottomSheet" parent="Widget.Material3.BottomSheet">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.SecureVault.BottomSheet</item>
+        <item name="backgroundTint">@color/color_surface</item>
+    </style>
+
+    <style name="ShapeAppearance.SecureVault.BottomSheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">24dp</item>
+        <item name="cornerSizeTopRight">24dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+</resources>

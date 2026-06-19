@@ -141,7 +141,8 @@ async function login(req, res) {
     // SRS FR-AUTH-01 — "backend SHALL issue session custom tokens"
     const customToken = await admin.auth().createCustomToken(uid);
 
-    const registered = !!userExists;
+    // User is "registered" only if they completed onboarding (security question + PIN)
+    const registered = !!(userExists && userExists.securityQuestionId);
     const statusCode = registered ? 200 : 201;
 
     return res.status(statusCode).json({

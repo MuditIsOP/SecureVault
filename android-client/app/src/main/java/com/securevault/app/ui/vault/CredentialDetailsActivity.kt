@@ -137,6 +137,9 @@ class CredentialDetailsActivity : AppCompatActivity() {
         cardPasswordHistory = findViewById(R.id.card_password_history)
         llHistoryEntries = findViewById(R.id.ll_history_entries)
         progressLoading = findViewById(R.id.progress_loading)
+
+        // Back button
+        findViewById<ImageButton>(R.id.btn_back).setOnClickListener { finish() }
     }
 
     // -------------------------------------------------------------------------
@@ -174,8 +177,23 @@ class CredentialDetailsActivity : AppCompatActivity() {
                 tvUsername.text = credential.usernameEmail
                 tvPassword.text = "••••••••" // Hidden by default — SCR-VLT-03
                 tvWebsiteUrl.text = credential.websiteUrl ?: "—"
+                // Also set the copy-section URL
+                findViewById<TextView>(R.id.tv_website_url_copy).text = credential.websiteUrl ?: "—"
                 tvCreatedDate.text = formatDate(credential.createdAt)
                 tvUpdatedDate.text = formatDate(credential.updatedAt)
+
+                // Load website favicon
+                val domain = CredentialAdapter.extractDomain(credential.websiteUrl)
+                if (domain != null) {
+                    val ivFavicon = findViewById<android.widget.ImageView>(R.id.iv_favicon)
+                    coil.ImageLoader(this@CredentialDetailsActivity).enqueue(
+                        coil.request.ImageRequest.Builder(this@CredentialDetailsActivity)
+                            .data("https://www.google.com/s2/favicons?domain=$domain&sz=128")
+                            .target(ivFavicon)
+                            .crossfade(true)
+                            .build()
+                    )
+                }
 
                 // Load category name
                 val categoryName = withContext(Dispatchers.IO) {
@@ -265,7 +283,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
                             isHistoryRevealed = false
                         } else {
                             try {
-                                val vmkKey = KeystoreManager.getVmkKey()
+                                val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
                                     ?: throw IllegalStateException("VMK key not available")
                                 val decrypted = CryptographyHelper.decrypt(
                                     entry.encryptedPassword, vmkKey
@@ -361,7 +379,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
         val credential = currentCredential ?: return
 
         try {
-            val vmkKey = KeystoreManager.getVmkKey()
+            val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
                 ?: throw IllegalStateException("VMK key not available")
 
             decryptedPassword = CryptographyHelper.decrypt(
@@ -389,7 +407,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
         val credential = currentCredential ?: return
 
         try {
-            val vmkKey = KeystoreManager.getVmkKey()
+            val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
                 ?: throw IllegalStateException("VMK key not available")
 
             val password = CryptographyHelper.decrypt(
@@ -487,7 +505,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
         return withContext(Dispatchers.IO) {
             val db = com.securevault.app.data.DatabaseModule.provideDatabase(applicationContext)
             val cursor = db.openHelper.readableDatabase
-                .rawQuery("SELECT id FROM users LIMIT 1", null)
+                .query("SELECT id FROM users LIMIT 1")
             cursor.use {
                 if (it.moveToFirst()) it.getString(0) else ""
             }

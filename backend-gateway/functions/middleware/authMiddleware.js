@@ -57,7 +57,8 @@ async function verifyFirebaseToken(req, res, next) {
     } catch (error) {
         // Do NOT leak specific error details — return generic 401
         // Security_Requirements.md §6 Response Sanitisation
-        console.error('[authMiddleware] Token verification failed:', error.code || error.message);
+        console.error('[authMiddleware] Token verification failed:', error.code, error.message);
+        console.error('[authMiddleware] Token prefix:', idToken ? idToken.substring(0, 20) + '...' : 'EMPTY');
         return res.status(401).json({
             error: {
                 code: 'UNAUTHENTICATED',

@@ -1,6 +1,8 @@
 package com.securevault.app.data.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.securevault.app.data.entities.UserEntity
 
@@ -14,6 +16,13 @@ import com.securevault.app.data.entities.UserEntity
  */
 @Dao
 interface UserDao {
+
+    /**
+     * Inserts user record if it doesn't exist.
+     * Used after login to ensure a local user record exists.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfNotExists(user: UserEntity): Long
 
     /**
      * Retrieves the single user configuration record.

@@ -106,7 +106,7 @@ class HealthDashboardActivity : AppCompatActivity() {
                 val db = DatabaseModule.provideDatabase(applicationContext)
                 val userId = withContext(Dispatchers.IO) {
                     val cursor = db.openHelper.readableDatabase
-                        .rawQuery("SELECT id FROM users LIMIT 1", null)
+                        .query("SELECT id FROM users LIMIT 1")
                     cursor.use {
                         if (it.moveToFirst()) it.getString(0) else ""
                     }

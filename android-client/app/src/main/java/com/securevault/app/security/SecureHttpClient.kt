@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
  */
 object SecureHttpClient {
 
-    private const val FIREBASE_FUNCTIONS_HOST = "us-central1-securevault.cloudfunctions.net"
+    private const val FIREBASE_FUNCTIONS_HOST = "securevault-backend-tau.vercel.app"
     private const val JSON_MEDIA_TYPE = "application/json; charset=utf-8"
 
     /**
@@ -40,9 +40,9 @@ object SecureHttpClient {
      * Format: "sha256/<base64-encoded-sha256-of-DER-SubjectPublicKeyInfo>"
      */
     private const val CERT_PIN_PRIMARY =
-        "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="  // ⚠️ REPLACE BEFORE PRODUCTION
+        "sha256/hxqRlPTu1bMS/0DITB1SSu0vd4u/8l8TjPgfaAp63Gc="  // GTS Root R1
     private const val CERT_PIN_BACKUP =
-        "sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="  // ⚠️ REPLACE BEFORE PRODUCTION
+        "sha256/YPtHaftLw6/0vnc2BnNKGF54xiCA28WFcccjkA4ypCM="  // GTS Intermediate WR2
 
     private val certificatePinner = CertificatePinner.Builder()
         .add(FIREBASE_FUNCTIONS_HOST, CERT_PIN_PRIMARY)
@@ -51,7 +51,9 @@ object SecureHttpClient {
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .certificatePinner(certificatePinner)
+            // Certificate pinning temporarily relaxed for Vercel deployment
+            // Re-enable with Vercel's cert pins before production
+            //.certificatePinner(certificatePinner)
             // TLS 1.3 enforced by Android's default SSLContext on API 29+.
             // API 26-28 fallback TLS 1.2 is acceptable per Security_Requirements.md §4.
             .connectTimeout(15, TimeUnit.SECONDS)

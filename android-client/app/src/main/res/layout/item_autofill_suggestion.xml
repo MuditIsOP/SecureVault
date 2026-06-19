@@ -17,7 +17,7 @@
         android:id="@+id/iv_autofill_icon"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:src="@android:drawable/ic_lock_lock"
+        android:src="@drawable/ic_lock"
         android:contentDescription="SecureVault" />
 
     <LinearLayout

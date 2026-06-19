@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCR-ATH-01 — Security Question Challenge Screen Layout.
+  Design.md: surface #1D1B20, primary #D0BCFF, onSurface #E6E1E5
+  Referenced by ChallengeQuestionActivity.kt
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/color_background"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Security Challenge"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textColor="@color/color_on_surface"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please answer your security question to verify your identity."
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="@color/color_on_surface_variant"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Security question text — populated dynamically -->
+    <TextView
+        android:id="@+id/tv_security_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:textColor="@color/color_primary"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Answer input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        app:boxBackgroundColor="@color/color_surface_variant"
+        app:hintTextColor="@color/color_on_surface_variant"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_answer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Your answer"
+            android:textColor="@color/color_on_surface"
+            android:inputType="text"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Verify button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_verify"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Verify"
+        android:textColor="@color/color_on_primary"
+        app:backgroundTint="@color/color_primary"
+        app:cornerRadius="28dp" />
+
+    <!-- Loading overlay -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/color_primary"
+        app:trackColor="@color/color_surface_variant" />
+
+</LinearLayout>

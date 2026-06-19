@@ -35,7 +35,7 @@ const setupSchema = Joi.object({
     securityQuestionId: Joi.string().min(1).max(64).required(),
     // securityAnswerHash: PBKDF2 hash from client — base64(salt):base64(key)
     securityAnswerHash: Joi.string().min(1).max(512).required(),
-    encryptedVmk: Joi.string().min(1).max(2048).required(),
+    encryptedVmk: Joi.string().allow('').max(2048).required(),
     challengeToken: Joi.string().optional()
 });
 

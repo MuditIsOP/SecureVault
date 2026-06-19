@@ -262,10 +262,14 @@ class PinUnlockActivity : AppCompatActivity() {
                 val storedHash = withContext(Dispatchers.IO) { loadStoredPinHash() }
 
                 if (storedHash == null) {
-                    // No PIN stored — force re-onboarding
-                    setKeysEnabled(true)
-                    currentInput.clear()
-                    updateDots()
+                    // No PIN stored — redirect to PIN creation
+                    Toast.makeText(this@PinUnlockActivity,
+                        "No PIN set. Please create a PIN.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@PinUnlockActivity,
+                        com.securevault.app.ui.onboarding.PinCreateActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
                     return@launch
                 }
 
@@ -339,7 +343,7 @@ class PinUnlockActivity : AppCompatActivity() {
     private fun loadStoredPinHash(): String? {
         val db = DatabaseModule.provideDatabase(applicationContext)
         val cursor = db.openHelper.readableDatabase
-            .rawQuery("SELECT pin_hash FROM users LIMIT 1", null)
+            .query("SELECT pin_hash FROM users LIMIT 1")
         return cursor.use {
             if (it.moveToFirst()) it.getString(0).takeIf { h -> h.isNotEmpty() }
             else null

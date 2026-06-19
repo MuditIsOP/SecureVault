@@ -89,7 +89,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Copy Codes"
-                        app:icon="@android:drawable/ic_menu_share"
+                        app:icon="@drawable/ic_copy"
                         app:iconTint="@color/color_primary"
                         android:textColor="@color/color_primary" />
 

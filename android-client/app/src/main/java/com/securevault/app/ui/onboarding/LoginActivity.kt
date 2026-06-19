@@ -20,7 +20,15 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.securevault.app.R
 import com.securevault.app.data.api.AuthApiService
 import com.securevault.app.data.api.LoginRequest
+import com.securevault.app.data.api.SessionStore
+import com.securevault.app.data.DatabaseModule
+import com.securevault.app.ui.auth.PinUnlockActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 /**
  * SCR-ONB-01 — Onboarding & Google Sign-In Screen.
@@ -64,8 +72,60 @@ class LoginActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_login)
 
-        observeViewModel()
-        setupSignInButton()
+        // Check if user is already signed in — skip login screen
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            // User already signed in — refresh token and route appropriately
+            lifecycleScope.launch {
+                try {
+                    val token = currentUser.getIdToken(true).await()?.token
+                    if (token != null) {
+                        SessionStore.setToken(token)
+                        // Ensure local user record exists
+                        withContext(Dispatchers.IO) {
+                            val db = DatabaseModule.provideDatabase(applicationContext)
+                            val userEntity = com.securevault.app.data.entities.UserEntity(
+                                id = currentUser.uid,
+                                googleEmail = currentUser.email ?: "",
+                                securityQuestionId = "",
+                                securityAnswerHash = "",
+                                backupCodeHashes = "",
+                                encryptedVmk = "",
+                                pinHash = ""
+                            )
+                            db.userDao().insertIfNotExists(userEntity)
+                        }
+                        // Check if PIN exists locally
+                        val hasPin = withContext(Dispatchers.IO) {
+                            try {
+                                val db = DatabaseModule.provideDatabase(applicationContext)
+                                val user = db.userDao().getUser()
+                                !user?.pinHash.isNullOrEmpty()
+                            } catch (e: Exception) { false }
+                        }
+                        if (hasPin) {
+                            val intent = Intent(this@LoginActivity, PinUnlockActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                        } else {
+                            val intent = Intent(this@LoginActivity, PinCreateActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                        }
+                        finish()
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Auto-login failed: ${e.message}")
+                }
+                // If auto-login failed, fall through to login screen
+                observeViewModel()
+                setupSignInButton()
+            }
+        } else {
+            observeViewModel()
+            setupSignInButton()
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -128,8 +188,8 @@ class LoginActivity : AppCompatActivity() {
                 viewModel.setIdle()
             } catch (e: GetCredentialException) {
                 // PRD F-AUTH-01 AC#4 — sign-in failed
-                Log.e(TAG, "Credential Manager error: ${e.message}")
-                viewModel.setError("Sign-In Failed. Please check internet connection.")
+                Log.e(TAG, "Credential Manager error: ${e.type} — ${e.message}", e)
+                viewModel.setError("Sign-In Failed: ${e.type} — ${e.message}")
             }
         }
     }
@@ -142,8 +202,9 @@ class LoginActivity : AppCompatActivity() {
                         GoogleIdTokenCredential.createFrom(credential.data)
                     val idToken = googleIdTokenCredential.idToken
 
-                    // PRD F-AUTH-01 AC#3 — send token to backend for verification
-                    sendTokenToBackend(idToken)
+                    // PRD F-AUTH-01 AC#3 — sign into Firebase Auth first,
+                    // then send the Firebase ID token to the backend
+                    signInWithFirebaseAndSend(idToken)
                 } else {
                     viewModel.setError("Sign-In Failed. Unexpected credential type.")
                 }
@@ -160,7 +221,35 @@ class LoginActivity : AppCompatActivity() {
     // Security_Requirements.md §2.3 — device binding via ANDROID_ID
     // -------------------------------------------------------------------------
 
-    private fun sendTokenToBackend(googleIdToken: String) {
+    /**
+     * Signs into Firebase Auth using the Google ID token, then sends
+     * the resulting Firebase ID token to the backend.
+     */
+    private fun signInWithFirebaseAndSend(googleIdToken: String) {
+        val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
+        lifecycleScope.launch {
+            try {
+                val authResult = FirebaseAuth.getInstance()
+                    .signInWithCredential(credential)
+                    .await()
+                val firebaseToken = authResult.user
+                    ?.getIdToken(true)
+                    ?.await()
+                    ?.token
+                if (firebaseToken != null) {
+                    SessionStore.setToken(firebaseToken)
+                    sendTokenToBackend(firebaseToken)
+                } else {
+                    viewModel.setError("Sign-In Failed. Could not obtain Firebase token.")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Firebase sign-in failed: ${e.message}", e)
+                viewModel.setError("Sign-In Failed: ${e.message}")
+            }
+        }
+    }
+
+    private fun sendTokenToBackend(firebaseIdToken: String) {
         // Device ID binding — Security_Requirements.md §2.3
         @Suppress("HardwareIds")
         val deviceId = Settings.Secure.getString(
@@ -172,7 +261,7 @@ class LoginActivity : AppCompatActivity() {
         val androidVersion = android.os.Build.VERSION.RELEASE
 
         val request = LoginRequest(
-            googleIdToken = googleIdToken,
+            googleIdToken = firebaseIdToken,
             deviceId = deviceId,
             deviceName = deviceName,
             androidVersion = androidVersion
@@ -181,6 +270,25 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = AuthApiService.login(request)
+
+                // Create local user record if it doesn't exist
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                if (firebaseUser != null) {
+                    withContext(Dispatchers.IO) {
+                        val db = DatabaseModule.provideDatabase(applicationContext)
+                        val userEntity = com.securevault.app.data.entities.UserEntity(
+                            id = firebaseUser.uid,
+                            googleEmail = firebaseUser.email ?: "",
+                            securityQuestionId = "",
+                            securityAnswerHash = "",
+                            backupCodeHashes = "",
+                            encryptedVmk = "",
+                            pinHash = ""
+                        )
+                        db.userDao().insertIfNotExists(userEntity)
+                    }
+                }
+
                 viewModel.setSuccess(registered = response.registered)
             } catch (e: Exception) {
                 Log.e(TAG, "Backend login failed: ${e.message}")
@@ -196,23 +304,43 @@ class LoginActivity : AppCompatActivity() {
     /**
      * PRD F-AUTH-01 AC#1 — first-launch bypasses dashboard.
      * Routes per registered flag:
-     *   registered=true  → SCR-ATH-02 (existing account, proceed to PIN)
+     *   registered=true  → Check local PIN, route accordingly
      *   registered=false → SCR-ONB-02 (new account, start security question setup)
      */
     private fun handleSuccess(registered: Boolean) {
         setLoadingState(false)
         if (registered) {
-            // Existing user — go to PIN unlock
-            val intent = Intent(this, PinUnlockActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+            // Existing user — check if local PIN exists
+            lifecycleScope.launch {
+                val hasLocalPin = withContext(Dispatchers.IO) {
+                    try {
+                        val db = DatabaseModule.provideDatabase(applicationContext)
+                        val user = db.userDao().getUser()
+                        !user?.pinHash.isNullOrEmpty()
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+                if (hasLocalPin) {
+                    // Has local PIN — go to PIN unlock
+                    val intent = Intent(this@LoginActivity, PinUnlockActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                } else {
+                    // No local PIN — go to PIN creation (skip security question on same device)
+                    val intent = Intent(this@LoginActivity, PinCreateActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }
+                finish()
+            }
         } else {
             // New user — proceed through onboarding
             val intent = Intent(this, SecurityQuestionActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+            finish()
         }
-        finish()
     }
 
     /**

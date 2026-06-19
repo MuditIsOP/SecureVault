@@ -26,7 +26,7 @@
             android:layout_marginBottom="24dp"
             app:title="Export Vault"
             app:titleTextColor="@color/color_on_surface"
-            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+            app:navigationIcon="@drawable/ic_arrow_back"
             app:navigationIconTint="@color/color_on_surface" />
 
         <!-- Step 1: Security Question Challenge — PRD F-EXP-01 AC#1 -->

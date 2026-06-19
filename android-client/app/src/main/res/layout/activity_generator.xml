@@ -27,7 +27,7 @@
             android:layout_marginBottom="16dp"
             app:title="Password Generator"
             app:titleTextColor="@color/color_on_surface"
-            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+            app:navigationIcon="@drawable/ic_arrow_back"
             app:navigationIconTint="@color/color_on_surface" />
 
         <!-- Generated Password Display — monospace font per Design.md §3.2 -->

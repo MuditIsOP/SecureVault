@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -18,7 +19,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.textfield.TextInputEditText
+import android.widget.EditText
+import android.widget.ImageButton
 import com.securevault.app.R
 import kotlinx.coroutines.launch
 
@@ -61,8 +63,15 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var progressLoading: ProgressBar
     private lateinit var layoutEmpty: LinearLayout
     private lateinit var fabAddCredential: FloatingActionButton
-    private lateinit var etSearch: TextInputEditText
+    private lateinit var etSearch: EditText
     private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var dashboardContent: View
+    private lateinit var searchBarLayout: View
+    private lateinit var fragmentContainer: FrameLayout
+    private lateinit var toolbar: com.google.android.material.appbar.MaterialToolbar
+    private lateinit var btnSearchBack: ImageButton
+    private lateinit var btnSearchClear: ImageButton
+    private var isSearchExpanded = false
 
     private lateinit var credentialAdapter: CredentialAdapter
 
@@ -106,16 +115,18 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     // -------------------------------------------------------------------------
-    // Toolbar — task-017: Health Dashboard access via menu
+    // Toolbar — Search icon + Health Dashboard icon
     // -------------------------------------------------------------------------
 
     private fun setupToolbar() {
-        val toolbar: com.google.android.material.appbar.MaterialToolbar =
-            findViewById(R.id.toolbar_dashboard)
-        // PRD F-GEN-02 — Health Dashboard accessible from main screen
+        toolbar = findViewById(R.id.toolbar_dashboard)
         toolbar.inflateMenu(R.menu.dashboard_toolbar_menu)
         toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.action_search -> {
+                    toggleSearch()
+                    true
+                }
                 R.id.action_health -> {
                     val intent = Intent(this,
                         com.securevault.app.ui.generator.HealthDashboardActivity::class.java)
@@ -125,6 +136,34 @@ class DashboardActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    private fun toggleSearch() {
+        isSearchExpanded = !isSearchExpanded
+        if (isSearchExpanded) {
+            // Hide toolbar, show search bar
+            toolbar.visibility = View.GONE
+            searchBarLayout.visibility = View.VISIBLE
+            etSearch.requestFocus()
+            etSearch.postDelayed({
+                val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                imm.showSoftInput(etSearch, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+            }, 100)
+        } else {
+            collapseSearch()
+        }
+    }
+
+    private fun collapseSearch() {
+        isSearchExpanded = false
+        searchBarLayout.visibility = View.GONE
+        toolbar.visibility = View.VISIBLE
+        etSearch.setText("")
+        etSearch.clearFocus()
+        btnSearchClear.visibility = View.GONE
+        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+        imm.hideSoftInputFromWindow(etSearch.windowToken, 0)
+        viewModel.onSearchQueryChanged("")
     }
 
     override fun onResume() {
@@ -142,7 +181,12 @@ class DashboardActivity : AppCompatActivity() {
         layoutEmpty = findViewById(R.id.layout_empty)
         fabAddCredential = findViewById(R.id.fab_add_credential)
         etSearch = findViewById(R.id.et_search)
+        btnSearchBack = findViewById(R.id.btn_search_back)
+        btnSearchClear = findViewById(R.id.btn_search_clear)
         bottomNavigation = findViewById(R.id.bottom_navigation)
+        dashboardContent = findViewById(R.id.dashboard_content)
+        searchBarLayout = findViewById(R.id.search_bar_layout)
+        fragmentContainer = findViewById(R.id.fragment_container)
     }
 
     // -------------------------------------------------------------------------
@@ -169,8 +213,13 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun setupFab() {
         fabAddCredential.setOnClickListener {
-            val intent = Intent(this, AddEditCredentialActivity::class.java)
-            addEditLauncher.launch(intent)
+            val sheet = AddCredentialBottomSheet()
+            sheet.setOnCredentialSavedListener(object : AddCredentialBottomSheet.OnCredentialSavedListener {
+                override fun onCredentialSaved() {
+                    viewModel.refresh()
+                }
+            })
+            sheet.show(supportFragmentManager, AddCredentialBottomSheet.TAG)
         }
     }
 
@@ -180,10 +229,19 @@ class DashboardActivity : AppCompatActivity() {
     // -------------------------------------------------------------------------
 
     private fun setupSearch() {
+        // Back arrow collapses the search bar
+        btnSearchBack.setOnClickListener { collapseSearch() }
+
+        // Clear button clears the text
+        btnSearchClear.setOnClickListener {
+            etSearch.setText("")
+        }
+
+        // Text watcher — filter results + show/hide clear button
         etSearch.addTextChangedListener { text ->
             val query = text?.toString()?.trim() ?: ""
-            // Forward to ViewModel — debounce + DB query happens there
             viewModel.onSearchQueryChanged(query)
+            btnSearchClear.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
         }
     }
 
@@ -246,27 +304,70 @@ class DashboardActivity : AppCompatActivity() {
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_dashboard -> {
-                    // Already on dashboard
+                    showDashboard()
                     true
                 }
                 R.id.nav_categories -> {
-                    val intent = Intent(this, CategoriesActivity::class.java)
-                    startActivity(intent)
+                    showFragment(CategoriesFragment(), "categories")
                     true
                 }
                 R.id.nav_generator -> {
-                    // PRD F-GEN-01 AC#1 — "accessible via Bottom Navigation Tab 3"
-                    val intent = Intent(this, com.securevault.app.ui.generator.GeneratorActivity::class.java)
-                    startActivity(intent)
+                    showFragment(com.securevault.app.ui.generator.GeneratorFragment(), "generator")
                     true
                 }
                 R.id.nav_settings -> {
-                    // TODO: task-017/task-018 — Navigate to SettingsActivity
-                    Toast.makeText(this, "Settings coming soon", Toast.LENGTH_SHORT).show()
+                    showFragment(com.securevault.app.ui.settings.SettingsFragment(), "settings")
                     true
                 }
                 else -> false
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Fragment-based tab switching
+    // -------------------------------------------------------------------------
+
+    private fun showDashboard() {
+        // Collapse search if active
+        if (isSearchExpanded) collapseSearch()
+        toolbar.visibility = View.VISIBLE
+        toolbar.title = "SecureVault"
+        toolbar.menu.findItem(R.id.action_health)?.isVisible = true
+        toolbar.menu.findItem(R.id.action_search)?.isVisible = true
+        dashboardContent.visibility = View.VISIBLE
+        fragmentContainer.visibility = View.GONE
+        fabAddCredential.visibility = View.VISIBLE
+
+        // Remove any active fragment
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment != null) {
+            supportFragmentManager.beginTransaction()
+                .remove(currentFragment)
+                .commit()
+        }
+    }
+
+    private fun showFragment(fragment: androidx.fragment.app.Fragment, tag: String) {
+        // Collapse search if active
+        if (isSearchExpanded) collapseSearch()
+        toolbar.visibility = View.VISIBLE
+        // Update toolbar title per tab
+        toolbar.title = when (tag) {
+            "categories" -> "Categories"
+            "generator" -> "Generator"
+            "settings" -> "Settings"
+            else -> "SecureVault"
+        }
+        toolbar.menu.findItem(R.id.action_health)?.isVisible = false
+        toolbar.menu.findItem(R.id.action_search)?.isVisible = false
+
+        dashboardContent.visibility = View.GONE
+        fragmentContainer.visibility = View.VISIBLE
+        fabAddCredential.visibility = View.GONE
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment, tag)
+            .commit()
     }
 }

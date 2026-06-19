@@ -60,7 +60,7 @@ class SyncWorker(
         private const val MAX_RETRY_ATTEMPTS = 3
 
         // TODO: Replace with actual backend URL from BuildConfig
-        private const val SYNC_API_URL = "https://us-central1-securevault-app.cloudfunctions.net/api/v1/sync"
+        private const val SYNC_API_URL = "https://securevault-backend-tau.vercel.app/v1/sync"
 
         /**
          * Schedules the periodic sync worker with network constraints.
@@ -269,7 +269,7 @@ class SyncWorker(
 
     private fun getUserId(db: com.securevault.app.data.AppDatabase): String? {
         val cursor = db.openHelper.readableDatabase
-            .rawQuery("SELECT id FROM users LIMIT 1", null)
+            .query("SELECT id FROM users LIMIT 1")
         return cursor.use {
             if (it.moveToFirst()) it.getString(0) else null
         }

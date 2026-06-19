@@ -110,13 +110,13 @@ abstract class AppDatabase : RoomDatabase() {
                 }
 
                 override fun postKey(database: net.sqlcipher.database.SQLiteDatabase) {
-                    database.execSQL("PRAGMA secure_delete = ON;")
-                    database.execSQL("PRAGMA foreign_keys = ON;")
+                    database.rawExecSQL("PRAGMA secure_delete = ON;")
+                    database.rawExecSQL("PRAGMA foreign_keys = ON;")
                 }
             }
 
             val factory: SupportSQLiteOpenHelper.Factory =
-                SupportFactory(passphrase, pragmaHook)
+                SupportFactory(passphrase, pragmaHook, true)
 
             return Room.databaseBuilder(
                 context.applicationContext,

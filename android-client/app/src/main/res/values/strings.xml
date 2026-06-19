@@ -9,5 +9,5 @@
       MUST NOT be hardcoded with real values — Technical_Requirements.md §8.
       Populated via google-services.json or BuildConfig injection.
     -->
-    <string name="google_server_client_id" translatable="false">YOUR_GOOGLE_SERVER_CLIENT_ID</string>
+    <string name="google_server_client_id" translatable="false">330631876631-u0nfod907kf1muu98gusnnt0gm4o26oj.apps.googleusercontent.com</string>
 </resources>

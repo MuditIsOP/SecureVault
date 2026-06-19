@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCR-ONB-02 — Security Question Setup Screen Layout.
+  Design.md: surface #1D1B20, secondary #CCC2DC
+  Referenced by SecurityQuestionActivity.kt
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/color_background"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Security Question"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textColor="@color/color_on_surface"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select a security question and provide an answer. This will be used to verify your identity."
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="@color/color_on_surface_variant"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Security question dropdown — PRD F-AUTH-02 AC#1 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:hintTextColor="@color/color_on_surface_variant">
+
+        <AutoCompleteTextView
+            android:id="@+id/dropdown_security_question"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Select a question"
+            android:textColor="@color/color_on_surface"
+            android:inputType="none" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Answer input -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_security_answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        app:hintTextColor="@color/color_on_surface_variant">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_security_answer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Your answer"
+            android:textColor="@color/color_on_surface"
+            android:inputType="text"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Spacer -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Loading indicator -->
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/color_primary"
+        app:trackColor="@color/color_surface_variant" />
+
+    <!-- Continue button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_continue"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Continue"
+        android:textColor="@color/color_on_primary"
+        app:backgroundTint="@color/color_primary"
+        app:cornerRadius="28dp"
+        android:layout_marginBottom="24dp" />
+
+</LinearLayout>

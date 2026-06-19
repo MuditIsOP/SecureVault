@@ -135,7 +135,7 @@ class ExportActivity : AppCompatActivity() {
                 val db = DatabaseModule.provideDatabase(applicationContext)
                 val userId = withContext(Dispatchers.IO) {
                     val cursor = db.openHelper.readableDatabase
-                        .rawQuery("SELECT id FROM users LIMIT 1", null)
+                        .query("SELECT id FROM users LIMIT 1")
                     cursor.use {
                         if (it.moveToFirst()) it.getString(0) else ""
                     }
@@ -144,7 +144,7 @@ class ExportActivity : AppCompatActivity() {
                 // Load security question from users table (set in task-005)
                 val questionData = withContext(Dispatchers.IO) {
                     val cursor = db.openHelper.readableDatabase
-                        .rawQuery(
+                        .query(
                             "SELECT security_question, security_answer_hash FROM users WHERE id = ?",
                             arrayOf(userId)
                         )
@@ -388,7 +388,7 @@ class ExportActivity : AppCompatActivity() {
         val db = DatabaseModule.provideDatabase(applicationContext)
         val userId = withContext(Dispatchers.IO) {
             val cursor = db.openHelper.readableDatabase
-                .rawQuery("SELECT id FROM users LIMIT 1", null)
+                .query("SELECT id FROM users LIMIT 1")
             cursor.use {
                 if (it.moveToFirst()) it.getString(0) else ""
             }
@@ -406,7 +406,7 @@ class ExportActivity : AppCompatActivity() {
 
         // Decrypt all passwords in memory — Security_Requirements.md RESTRICTED
         val decryptedPasswords = withContext(Dispatchers.IO) {
-            val vmkKey = KeystoreManager.getVmkKey()
+            val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
             val map = mutableMapOf<String, String>()
             if (vmkKey != null) {
                 for (credential in credentials) {

@@ -270,7 +270,7 @@ class VaultAutofillService : AutofillService() {
 
         // Get current user ID
         val cursor = db.openHelper.readableDatabase
-            .rawQuery("SELECT id FROM users LIMIT 1", null)
+            .query("SELECT id FROM users LIMIT 1")
         val userId = cursor.use {
             if (it.moveToFirst()) it.getString(0) else return emptyList()
         }
@@ -343,7 +343,7 @@ class VaultAutofillService : AutofillService() {
             // Decrypt password on-the-fly for autofill
             if (fields.passwordId != null) {
                 try {
-                    val vmkKey = KeystoreManager.getVmkKey()
+                    val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
                     val decryptedPassword = if (vmkKey != null) {
                         CryptographyHelper.decrypt(credential.encryptedPassword, vmkKey)
                     } else {

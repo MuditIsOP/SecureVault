@@ -4,12 +4,50 @@ const express = require("express");
 const cors = require("cors");
 
 // Initialize Firebase Admin SDK
-admin.initializeApp();
+// On Vercel, use service account from env var; on Firebase, auto-credentials
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    projectId: serviceAccount.project_id
+  });
+} else {
+  admin.initializeApp();
+}
 
 const app = express();
 
 // Enable CORS
 app.use(cors({ origin: true }));
+
+// -------------------------------------------------------------------------
+// MongoDB connection — lazy singleton
+// -------------------------------------------------------------------------
+const { MongoClient } = require('mongodb');
+let cachedDb = null;
+
+async function connectToMongo() {
+  if (cachedDb) return cachedDb;
+  const uri = process.env.MONGODB_URI;
+  const dbName = process.env.MONGODB_DB_NAME || 'securevault';
+  const client = new MongoClient(uri);
+  await client.connect();
+  cachedDb = client.db(dbName);
+  return cachedDb;
+}
+
+// Attach db to every request
+app.use(async (req, res, next) => {
+  try {
+    req.app.locals.db = await connectToMongo();
+    next();
+  } catch (err) {
+    console.error('[MongoDB] Connection failed:', err.message);
+    res.status(500).json({
+      error: { code: 'INTERNAL', message: 'Database connection failed.', timestamp: Date.now() }
+    });
+  }
+});
 
 // Parse application/json
 app.use(express.json());
@@ -120,4 +158,7 @@ app.get("/health", (req, res) => {
 });
 
 // Export the Express App as a Firebase Cloud Function
-exports.api = functions.https.onRequest(app);
+exports.api = functions.region("asia-south1").https.onRequest(app);
+
+// Also export raw Express app for Vercel deployment
+module.exports = app;

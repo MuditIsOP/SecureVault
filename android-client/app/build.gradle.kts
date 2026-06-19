@@ -101,7 +101,10 @@ dependencies {
 
     // Biometric Authentication (task-009: F-AUTH-06)
     // Security_Requirements.md §1 — [MUST] use system BiometricPrompt
-    implementation("androidx.biometric:biometric:1.2.0")
+    implementation("androidx.biometric:biometric:1.1.0")
+
+    // Image loading — for website favicon fetching (Google Favicon API)
+    implementation("io.coil-kt:coil:2.5.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
