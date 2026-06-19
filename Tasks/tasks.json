@@ -1,0 +1,1130 @@
+{
+  "projectName": "SecureVault",
+  "version": "1.0.0",
+  "lastUpdated": "2026-06-15",
+  "documentSources": {
+    "blueprint": "/documents/Blueprint.md",
+    "prd": "/documents/PRD.md",
+    "techReq": "/documents/Technical_Requirements.md",
+    "security": "/documents/Security_Requirements.md",
+    "permissions": "/documents/Permissions_Matrix.md",
+    "srs": "/documents/SRS.md",
+    "architecture": "/documents/Architecture.md",
+    "dbSchema": "/documents/Database_Schema.md",
+    "apiSpec": "/documents/API_Spec.md",
+    "screens": "/documents/Screens.md",
+    "routes": "/documents/Routes.md",
+    "design": "/documents/Design.md",
+    "testing": "/documents/Testing_Strategy.md"
+  },
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Infrastructure and Environment Setup",
+      "description": "Initialize the Android project directory structure and configure build dependencies, plugins, and Node.js backend environment configurations.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [],
+        "prdFeature": "N/A",
+        "screens": [],
+        "securityThreats": [],
+        "srsRequirement": "N/A",
+        "testCases": []
+      },
+      "files": [
+        "android-client/build.gradle.kts",
+        "android-client/app/build.gradle.kts",
+        "android-client/settings.gradle.kts",
+        "android-client/gradle/wrapper/gradle-wrapper.properties",
+        "backend-gateway/functions/package.json",
+        "backend-gateway/functions/index.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-15",
+      "actualHours": 4,
+      "notes": "Infrastructure initialized. Kotlin 1.9.22, Gradle 8.2, target SDK 34, Node 20 LTS runtime setup complete.",
+      "assignedTo": "AI",
+      "tags": [
+        "infrastructure",
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-002",
+      "title": "Database Entities & Room Schema Configuration",
+      "description": "Formally declare Room entities, primary/foreign keys, unique constraints, and initial mock database builders for the local SQLite cache database.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [
+        "task-001"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "users",
+          "vault_passwords",
+          "password_history",
+          "categories",
+          "device_sessions",
+          "sync_queue"
+        ],
+        "prdFeature": "F-SYNC-01",
+        "screens": [],
+        "securityThreats": [],
+        "srsRequirement": "FR-SYNC-01",
+        "testCases": [
+          "IT-SYNC-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/data/entities/UserEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/entities/PasswordEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/entities/CategoryEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/entities/HistoryEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/entities/DeviceSessionEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/entities/SyncQueueEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/AppDatabase.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-15",
+      "actualHours": 3,
+      "notes": "All 6 Room entities declared per Database_Schema.md §2. AppDatabase registered with SQLCipher SupportFactory + PRAGMA secure_delete=ON. ON DELETE CASCADE/SET NULL FK constraints implemented. Schema integration tests written covering IT-SYNC-01 (partial) and all FK cascade behaviors.",
+      "assignedTo": "AI",
+      "tags": [
+        "database",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-003",
+      "title": "Local Cryptography & Secure Storage Setup",
+      "description": "Initialize SQLCipher database encryption at rest and implement the Android Keystore CryptographyHelper for AES-256-GCM in-memory operations.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 12,
+      "dependencies": [
+        "task-002"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "users"
+        ],
+        "prdFeature": "F-SYNC-01",
+        "screens": [],
+        "securityThreats": [
+          "ST-CLIENT-TAMP-01",
+          "ST-CLIENT-LEAK-01",
+          "ST-CLIENT-PRIV-01"
+        ],
+        "srsRequirement": "FR-SYNC-01",
+        "testCases": [
+          "ST-STRIDE-02",
+          "ST-STRIDE-03",
+          "ST-STRIDE-04"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/CryptographyHelper.kt",
+        "android-client/app/src/main/java/com/securevault/app/security/KeystoreManager.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/DatabaseModule.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-15",
+      "actualHours": 3,
+      "notes": "KeystoreManager generates 256-bit AES-GCM keys in hardware-backed TEE. CryptographyHelper implements AES-256-GCM encrypt/decrypt with 12-byte IV prepended to ciphertext. DatabaseModule wires Keystore key → passphrase derivation → AppDatabase SupportFactory with immediate passphrase zeroing. 14 unit tests written covering Testing_Strategy.md Part 1 §1 happy/boundary/invalid/perf cases.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "database",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-004",
+      "title": "Google Authentication & User Registration",
+      "description": "Implement Google Sign-In via Android Credential Manager API on the client, and custom JWT authentication gates on the backend gateway.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 12,
+      "dependencies": [
+        "task-003"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/auth/login"
+        ],
+        "dbTables": [
+          "users",
+          "device_sessions"
+        ],
+        "prdFeature": "F-AUTH-01",
+        "screens": [
+          "SCR-ONB-01"
+        ],
+        "securityThreats": [
+          "ST-GATEWAY-SPOOF-01"
+        ],
+        "srsRequirement": "FR-AUTH-01",
+        "testCases": [
+          "IT-AUTH-01",
+          "UAT-GENERAL-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/onboarding/LoginActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/onboarding/LoginViewModel.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/api/AuthApiService.kt",
+        "android-client/app/src/main/java/com/securevault/app/security/SecureHttpClient.kt",
+        "android-client/app/src/main/res/layout/activity_login.xml",
+        "android-client/app/src/main/res/values/strings.xml",
+        "android-client/app/src/main/res/values/colors.xml",
+        "android-client/app/src/main/AndroidManifest.xml",
+        "backend-gateway/functions/controllers/authController.js",
+        "backend-gateway/functions/middleware/authMiddleware.js",
+        "backend-gateway/functions/index.js",
+        "backend-gateway/functions/test/authController.test.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-15",
+      "actualHours": 4,
+      "notes": "LoginActivity (SCR-ONB-01) wired to Credential Manager API with FLAG_SECURE, ANDROID_ID device binding. AuthApiService + SecureHttpClient (TLS 1.3 + cert pinning). Backend authController verifies Google JWT via Firebase Admin, enforces 3-device limit, upserts user + device_sessions. authMiddleware covers all protected routes. 8 IT-AUTH-01 backend tests written.",
+      "assignedTo": "AI",
+      "tags": [
+        "auth",
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-005",
+      "title": "Security Question Setup & Challenge",
+      "description": "Configure the security question registration interface during onboarding, hashed response verification APIs, and administrative gatekeep tokens.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 10,
+      "dependencies": [
+        "task-004"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/auth/security-question/setup",
+          "POST /v1/auth/security-question/verify"
+        ],
+        "dbTables": [
+          "users"
+        ],
+        "prdFeature": "F-AUTH-02",
+        "screens": [
+          "SCR-ONB-02",
+          "SCR-ATH-01"
+        ],
+        "securityThreats": [
+          "ST-GATEWAY-LEAK-01"
+        ],
+        "srsRequirement": "FR-AUTH-02",
+        "testCases": [
+          "IT-AUTH-03",
+          "IT-AUTH-04"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/SecurityQuestionHasher.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/onboarding/SecurityQuestionActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/auth/ChallengeQuestionActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/api/AuthApiService.kt",
+        "backend-gateway/functions/controllers/securityController.js",
+        "backend-gateway/functions/test/securityController.test.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-15",
+      "actualHours": 3,
+      "notes": "PBKDF2-SHA256 hasher with 100k iterations, constant-time verify, trim+lowercase normalization. SCR-ONB-02 with 15 predefined questions. SCR-ATH-01 with adaptive delay and challenge token return. Backend securityController with Joi validation, PBKDF2 re-derivation, HMAC challenge tokens. 13 unit + integration tests covering IT-AUTH-03/04.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-006",
+      "title": "PIN Creation & Unlock Verification",
+      "description": "Implement local PIN setup workflows, database seeding, daily app lockscreen overlays, and biometric fallback prompts.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 10,
+      "dependencies": [
+        "task-005"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "users"
+        ],
+        "prdFeature": "F-AUTH-03",
+        "screens": [
+          "SCR-ONB-03",
+          "SCR-ATH-02"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-AUTH-03",
+        "testCases": [
+          "UAT-GENERAL-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/PinHasher.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/onboarding/PinCreateActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/auth/PinUnlockActivity.kt",
+        "android-client/app/src/test/java/com/securevault/app/security/PinHasherTest.kt",
+        "android-client/app/src/main/AndroidManifest.xml"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-15",
+      "actualHours": 3,
+      "notes": "PinHasher: PBKDF2WithHmacSHA256 100k iterations, 16-byte salt, 64-char hex key matching Database_Schema.md CHECK constraint. PinCreateActivity: two-phase enter+confirm flow, hash written to SQLCipher DB. PinUnlockActivity: < 100ms verify gate, back exits app, Professional variant header, delegates lockout to task-007. 17 unit tests.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-007",
+      "title": "PIN Lockout State Sync & Delay Enforcement",
+      "description": "Implement progressive delays, lockout countdown overlays, local DB persistency, and cloud synchronization APIs for failed PIN attempts.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 10,
+      "dependencies": [
+        "task-006"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/auth/lockout"
+        ],
+        "dbTables": [
+          "users"
+        ],
+        "prdFeature": "F-AUTH-04",
+        "screens": [
+          "SCR-ATH-03"
+        ],
+        "securityThreats": [
+          "ST-GATEWAY-DOS-01"
+        ],
+        "srsRequirement": "FR-AUTH-04",
+        "testCases": [
+          "IT-AUTH-05",
+          "ST-STRIDE-08"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/auth/LockoutActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/security/PINLockoutManager.kt",
+        "backend-gateway/functions/controllers/lockoutController.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-16",
+      "actualHours": 4,
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-008",
+      "title": "Backup Code Recovery & PIN Resets",
+      "description": "Establish backup recovery code validation, single-use logic, code regeneration settings interfaces, and server verification APIs.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "medium",
+      "estimatedHours": 10,
+      "dependencies": [
+        "task-006"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/auth/backup-codes/verify",
+          "POST /v1/auth/backup-codes/regenerate"
+        ],
+        "dbTables": [
+          "users"
+        ],
+        "prdFeature": "F-AUTH-05",
+        "screens": [
+          "SCR-ONB-04"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-AUTH-05",
+        "testCases": [
+          "IT-AUTH-06",
+          "IT-AUTH-07"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/onboarding/BackupCodesActivity.kt",
+        "backend-gateway/functions/controllers/backupController.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 5,
+      "notes": "backupController.js: SHA-256 single-use verify, HMAC challenge token return, regenerate with optional challengeToken gate. BackupCodesActivity.kt: SCR-ONB-04 display + copy flow. PIN reset integration in PinCreateActivity/LockoutActivity. 9 Jest integration tests (IT-AUTH-06/07) all passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-009",
+      "title": "Biometric Integration & Enrollment Checks",
+      "description": "Implement biometric enrollment validation, Keystore dynamic key invalidation, settings triggers, and fallback challenge configurations.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "medium",
+      "estimatedHours": 10,
+      "dependencies": [
+        "task-006"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [],
+        "prdFeature": "F-AUTH-06",
+        "screens": [
+          "SCR-SET-02"
+        ],
+        "securityThreats": [
+          "ST-CLIENT-PRIV-01"
+        ],
+        "srsRequirement": "FR-AUTH-06",
+        "testCases": [
+          "ST-STRIDE-04"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/BiometricHelper.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/settings/SecuritySettingsActivity.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 3,
+      "notes": "BiometricHelper.kt: CryptoObject-bound BiometricPrompt, KeyPermanentlyInvalidatedException handling, SharedPreferences toggle state. SecuritySettingsActivity.kt: SCR-SET-02 with biometric/autofill switches, change PIN and regenerate codes actions. PinUnlockActivity.kt: biometric prompt on resume when enabled, confirmation mode for settings PIN check. 8 JVM unit tests for sealed class contracts.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-010",
+      "title": "Categories Management",
+      "description": "Establish predefined database category seeds, custom categories CRUD endpoints, list UI interfaces, and soft-delete migration logic.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [
+        "task-002"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "GET /v1/categories",
+          "POST /v1/categories",
+          "PUT /v1/categories/{id}",
+          "DELETE /v1/categories/{id}"
+        ],
+        "dbTables": [
+          "categories",
+          "vault_passwords"
+        ],
+        "prdFeature": "F-VAULT-06",
+        "screens": [
+          "SCR-VLT-04"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-VAULT-06",
+        "testCases": [
+          "IT-VAULT-06",
+          "IT-VAULT-07",
+          "IT-VAULT-08",
+          "IT-VAULT-09",
+          "UAT-STUDENT-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/data/dao/CategoryDao.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/vault/CategoriesActivity.kt",
+        "backend-gateway/functions/controllers/categoryController.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 4,
+      "notes": "CategoryDao.kt: Room DAO with CRUD, duplicate check, password count, seed helper, programmatic ON DELETE SET NULL. categoryController.js: GET/POST/PUT/DELETE with Joi validation, uid-scoped, default seeding, duplicate guard, default deletion guard. CategoriesActivity.kt: SCR-VLT-04 RecyclerView list. categoryController.test.js: 13 tests (IT-VAULT-06/07/08/09) all passing. 48/48 total.",
+      "assignedTo": "AI",
+      "tags": [
+        "database",
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-011",
+      "title": "Credentials CRUD Operations",
+      "description": "Implement vault credential details creation layouts, AES-256 local encrypted storage updates, detail reveal actions, and soft-delete trash pathways.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 16,
+      "dependencies": [
+        "task-003",
+        "task-010"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "GET /v1/vault",
+          "POST /v1/vault",
+          "PUT /v1/vault/{id}",
+          "DELETE /v1/vault/{id}"
+        ],
+        "dbTables": [
+          "vault_passwords",
+          "password_history"
+        ],
+        "prdFeature": "F-VAULT-02",
+        "screens": [
+          "SCR-VLT-02",
+          "SCR-VLT-03"
+        ],
+        "securityThreats": [
+          "ST-CLIENT-LEAK-01",
+          "ST-GATEWAY-PRIV-01"
+        ],
+        "srsRequirement": "FR-VAULT-02",
+        "testCases": [
+          "IT-VAULT-01",
+          "IT-VAULT-02",
+          "IT-VAULT-03",
+          "IT-VAULT-04",
+          "UAT-STUDENT-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/data/dao/VaultDao.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/vault/AddEditCredentialActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/vault/CredentialDetailsActivity.kt",
+        "backend-gateway/functions/controllers/vaultController.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 6,
+      "notes": "VaultDao.kt: Full CRUD + search + favorites + soft-delete/restore/purge + password history. vaultController.js: GET/POST/PUT/DELETE with Joi, uid-scoping, version increment, password history on update, soft delete. AddEditCredentialActivity.kt: SCR-VLT-02 with AES-256-GCM encryption via VMK. CredentialDetailsActivity.kt: SCR-VLT-03 with reveal/copy/30s clipboard clear, delete to trash, password history. 11 integration tests (IT-VAULT-01/02/03/04) passing. 59/59 total.",
+      "assignedTo": "AI",
+      "tags": [
+        "database",
+        "backend",
+        "frontend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-012",
+      "title": "Credentials History Tracking",
+      "description": "Implement the local database password history collection, update hooks tracking changes, and details history listing interfaces.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [
+        "task-011"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "password_history"
+        ],
+        "prdFeature": "F-VAULT-03",
+        "screens": [
+          "SCR-VLT-03"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-VAULT-03",
+        "testCases": []
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/data/entities/HistoryEntity.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/dao/HistoryDao.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 2,
+      "notes": "HistoryDao.kt: Dedicated DAO with insert, getLastThree, purgeOldestBeyondLimit (subquery), archiveAndPurge convenience. AddEditCredentialActivity: Fixed to only archive when password actually changes (edge case). CredentialDetailsActivity: Per-item Eye Icon reveal toggle for history entries. AppDatabase: historyDao() registered. No API changes. 59/59 backend tests still passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "database",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-013",
+      "title": "Clipboard Security & Details Actions",
+      "description": "Configure copy action handlers, system clipboard writing helpers, and background auto-clear timeouts.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [
+        "task-011"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [],
+        "prdFeature": "F-VAULT-04",
+        "screens": [
+          "SCR-VLT-03"
+        ],
+        "securityThreats": [
+          "ST-CLIENT-LEAK-01"
+        ],
+        "srsRequirement": "FR-VAULT-04",
+        "testCases": [
+          "ST-STRIDE-03"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/ClipboardManager.kt",
+        "android-client/app/src/main/java/com/securevault/app/service/ClipboardClearService.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 2,
+      "notes": "SecureClipboardManager.kt: singleton wrapper with copyPassword/copyUsername/copyWebsite, label-based 30s auto-clear via Handler + ClipboardClearService safety net. ClipboardClearService.kt: background service with START_NOT_STICKY, label comparison before clear. CredentialDetailsActivity: refactored to use SecureClipboardManager, added Copy Username and Copy Website buttons. Layout updated with btn_copy_username, btn_copy_website. Service registered in AndroidManifest. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-014",
+      "title": "Main Dashboard UI & Favorites Top-Sorting",
+      "description": "Construct the main dashboard listing layout, bottom navigation bars, search anchors, and SQLCipher favorites sorting algorithms.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 12,
+      "dependencies": [
+        "task-011"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-VAULT-01",
+        "screens": [
+          "SCR-VLT-01"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-VAULT-01",
+        "testCases": []
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/vault/DashboardActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/vault/CredentialAdapter.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 3,
+      "notes": "DashboardActivity.kt (SCR-VLT-01): RecyclerView with favorites-first sorting, FAB→AddEdit, card tap→Details, bottom nav (Dashboard/Categories/Settings), search filter, Loading/Empty/Content states. CredentialAdapter.kt: DiffUtil-based ListAdapter with letter avatar, name, username, star. VaultDao: getDashboardCredentials (ORDER BY favorite DESC, name ASC). Layout XMLs: activity_dashboard, item_credential, bottom_nav_menu, circle_avatar_bg. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend",
+        "database"
+      ]
+    },
+    {
+      "id": "task-015",
+      "title": "Real-Time Debounced Vault Search",
+      "description": "Implement the real-time search filtering layout on the dashboard with a 100ms debounce buffer to prevent input UI lag.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "low",
+      "estimatedHours": 6,
+      "dependencies": [
+        "task-014"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-SRCH-01",
+        "screens": [
+          "SCR-VLT-01"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-SRCH-01",
+        "testCases": []
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/vault/DashboardViewModel.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 2,
+      "notes": "DashboardViewModel.kt: Flow-based 100ms debounce via Flow.debounce() + flatMapLatest, DashboardState sealed class (Loading/Content/Empty/Error). DashboardActivity: refactored to ViewModel observation via repeatOnLifecycle, removed inline filtering. VaultDao.searchCredentials: updated to sort favorites-first (ORDER BY favorite DESC, name ASC), added spec refs. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-016",
+      "title": "Password Generator & Complexity Options",
+      "description": "Construct high-entropy random generation services, complexity toggle configurations, length sliders, and zxcvbn strength meters.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [
+        "task-001"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [],
+        "prdFeature": "F-GEN-01",
+        "screens": [
+          "SCR-GEN-01"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-GEN-01",
+        "testCases": [
+          "UAT-DEVELOPER-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/PasswordGenerator.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/generator/GeneratorFragment.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 3,
+      "notes": "PasswordGenerator.kt: SecureRandom-based generator with configurable toggles (upper/lower/numbers/symbols/exclude-similar), length 8-64, character diversity enforcement. PasswordStrengthAnalyzer.kt: zxcvbn-style local scoring (0-4 levels, entropy estimation, pattern penalties). GeneratorActivity.kt (SCR-GEN-01): length slider, 5 toggles, real-time strength meter, Copy (SecureClipboardManager), Use Password (returns to AddEdit). Bottom nav updated with Generator tab. AddEditCredentialActivity: Generate button now launches GeneratorActivity. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-017",
+      "title": "Password Health Dashboard & Duplicate Detection",
+      "description": "Create background scanning engines analyzing local vault records, duplicate reuse alerts on saving, and health dashboards.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "medium",
+      "estimatedHours": 10,
+      "dependencies": [
+        "task-011"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-GEN-02",
+        "screens": [
+          "SCR-GEN-02"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-GEN-02",
+        "testCases": []
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/generator/HealthDashboardActivity.kt",
+        "android-client/app/src/main/java/com/securevault/app/security/VaultHealthAuditor.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 3,
+      "notes": "VaultHealthAuditor.kt: strength distribution counting (weak/medium/strong), reuse detection via encrypted value comparison, recommendation generator. HealthDashboardActivity.kt (SCR-GEN-02): stats cards, dynamic recommendation cards with offending entry lists, all-good/empty states. AddEditCredentialActivity.kt: duplicate detection on save with MaterialAlertDialog warning, performSave/performSaveInternal extraction. DashboardActivity toolbar menu for health access. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-018",
+      "title": "Android Autofill Service Integration",
+      "description": "Implement the Android native AutofillService interface, suggestions dropdown overlays, and target app identifier mappings.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 16,
+      "dependencies": [
+        "task-011"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-AUTO-01",
+        "screens": [],
+        "securityThreats": [
+          "ST-CLIENT-SPOOF-01"
+        ],
+        "srsRequirement": "FR-AUTO-01",
+        "testCases": [
+          "ST-STRIDE-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/service/VaultAutofillService.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-18",
+      "actualHours": 4,
+      "notes": "VaultAutofillService.kt: extends AutofillService, 4-strategy node parsing (autofill hints, HTML attrs, view IDs, InputType), credential query with package-based matching, FillResponse with RemoteViews datasets, on-the-fly password decryption. autofill_service_config.xml, item_autofill_suggestion.xml layout. AndroidManifest: BIND_AUTOFILL_SERVICE permission + intent-filter + meta-data. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-019",
+      "title": "Secure PDF Export Generation",
+      "description": "Construct native PdfDocument generation, password-protection formatting, security question validation gates, and system share sheet triggers.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "high",
+      "estimatedHours": 12,
+      "dependencies": [
+        "task-011",
+        "task-005"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/auth/security-question/verify"
+        ],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-EXP-01",
+        "screens": [
+          "SCR-SET-01"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-EXP-01",
+        "testCases": [
+          "IT-AUTH-04",
+          "UAT-PROFESSIONAL-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/PdfExportHelper.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/settings/ExportActivity.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 4,
+      "notes": "PdfExportHelper.kt: native PdfDocument API, A4 pages with dark bg, credential fields (Name/Username/Password/URL), pagination. ExportActivity.kt: 2-step flow (security question SHA-256 verification → PDF password input → generate → Share Sheet via FileProvider). SPEC DEVIATION: Android PdfDocument has no encryption API — PDF generated unencrypted; flagged for iText library integration. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-020",
+      "title": "Plaintext CSV Export",
+      "description": "Build CSV formatted text generation, plaintext warning alerts, security question validation gates, and system share sheet triggers.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "medium",
+      "estimatedHours": 8,
+      "dependencies": [
+        "task-011",
+        "task-005"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/auth/security-question/verify"
+        ],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-EXP-02",
+        "screens": [
+          "SCR-SET-01"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-EXP-02",
+        "testCases": [
+          "IT-AUTH-04"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/CsvExportHelper.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 3,
+      "notes": "CsvExportHelper.kt: RFC 4180 compliant CSV with proper escaping (commas, quotes, newlines). ExportActivity.kt refactored to support dual PDF/CSV modes via EXTRA_EXPORT_TYPE. CSV flow shows MaterialAlertDialog plaintext warning before generation per F-EXP-02 AC#2, SRS FR-EXP-02b. Extracted shared fetchAndDecryptCredentials and parameterized openShareSheet. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "security",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-021",
+      "title": "Sync Queue Logging & WorkManager Scheduling",
+      "description": "Establish local database sync queue tracking, transaction loggers, WorkManager connectivity sync tasks, and retry protocols.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 16,
+      "dependencies": [
+        "task-011"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [
+          "sync_queue"
+        ],
+        "prdFeature": "F-SYNC-01",
+        "screens": [],
+        "securityThreats": [],
+        "srsRequirement": "FR-SYNC-01",
+        "testCases": [
+          "IT-SYNC-01"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/data/dao/SyncQueueDao.kt",
+        "android-client/app/src/main/java/com/securevault/app/worker/SyncWorker.kt",
+        "android-client/app/src/main/java/com/securevault/app/data/SyncQueueManager.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 4,
+      "notes": "SyncQueueDao.kt: Room DAO with insert, getPending/Failed, deleteById/byIds, markFailed, resetFailedToPending. SyncQueueManager.kt: typed log methods for credential/category CRUD with application-layer CHECK constraint enforcement. SyncWorker.kt: CoroutineWorker with NetworkType.CONNECTED constraints, 15-min periodic schedule, exponential backoff, POST /v1/sync push, success cleanup / failure marking. AppDatabase.kt: syncQueueDao() registered. 59/59 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "database",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-022",
+      "title": "Serverless Gateway APIs & Conflict Resolution",
+      "description": "Build Firebase Functions API handlers, MongoDB Atlas connection gateways, hybrid conflict resolvers, and write logs collections.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 16,
+      "dependencies": [
+        "task-004"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "POST /v1/sync"
+        ],
+        "dbTables": [
+          "vault_passwords"
+        ],
+        "prdFeature": "F-SYNC-03",
+        "screens": [],
+        "securityThreats": [
+          "ST-GATEWAY-TAMP-01",
+          "ST-GATEWAY-PRIV-01"
+        ],
+        "srsRequirement": "FR-SYNC-03",
+        "testCases": [
+          "IT-SYNC-01",
+          "ST-STRIDE-06",
+          "ST-STRIDE-09"
+        ]
+      },
+      "files": [
+        "backend-gateway/functions/controllers/syncController.js",
+        "backend-gateway/functions/utils/db.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 5,
+      "notes": "syncController.js: POST /v1/sync with hybrid conflict resolution (version counter + timestamp comparison per F-SYNC-03 AC#1/2/3). INSERT/UPDATE/DELETE handlers, uid-scoped queries, Joi validation, soft-delete for vault_passwords/hard-delete for categories, remote updates since lastSyncTime. syncController.test.js: 16 tests covering IT-SYNC-01, ST-STRIDE-06, ST-STRIDE-09, conflict resolver unit tests. index.js: route registered. 75/75 tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "backend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-023",
+      "title": "Multi-Device Limits & Session Logs",
+      "description": "Implement the concurrent devices limitation APIs, active devices screens, and session revocation controllers.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "medium",
+      "estimatedHours": 12,
+      "dependencies": [
+        "task-022"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [
+          "GET /v1/devices",
+          "DELETE /v1/devices/{id}"
+        ],
+        "dbTables": [
+          "device_sessions"
+        ],
+        "prdFeature": "F-DEV-01",
+        "screens": [
+          "SCR-DEV-01"
+        ],
+        "securityThreats": [],
+        "srsRequirement": "FR-DEV-01",
+        "testCases": [
+          "IT-DEV-01",
+          "IT-DEV-02"
+        ]
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/ui/settings/ActiveDevicesActivity.kt",
+        "backend-gateway/functions/controllers/deviceController.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 4,
+      "notes": "deviceController.js: GET /v1/devices (list sessions), DELETE /v1/devices/{id} (revoke/hard-delete), POST /v1/devices/register (3-device limit check + session creation). ActiveDevicesActivity.kt: RecyclerView with Device Name, Android Version, Last Active, Current Device badge, forced mode for login limit. deviceController.test.js: 9 tests covering IT-DEV-01, IT-DEV-02, registration + limit enforcement. 84/84 tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "backend",
+        "frontend"
+      ]
+    },
+    {
+      "id": "task-024",
+      "title": "Compromised Environment Startup Warnings",
+      "description": "Write native client check wrappers searching superuser root access files and active USB debugging developer states.",
+      "status": "completed",
+      "priority": "P1",
+      "complexity": "low",
+      "estimatedHours": 6,
+      "dependencies": [
+        "task-001"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [],
+        "prdFeature": "F-DEV-02",
+        "screens": [
+          "SCR-ATH-05"
+        ],
+        "securityThreats": [
+          "ST-CLIENT-TAMP-01"
+        ],
+        "srsRequirement": "FR-DEV-02",
+        "testCases": []
+      },
+      "files": [
+        "android-client/app/src/main/java/com/securevault/app/security/EnvironmentChecker.kt",
+        "android-client/app/src/main/java/com/securevault/app/ui/auth/EnvWarningActivity.kt"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 2,
+      "notes": "EnvironmentChecker.kt: root detection (su/busybox/magisk binary paths, root app packages, test-keys build tags), USB debugging detection (Settings.Global.ADB_ENABLED), emulator detection. EnvWarningActivity.kt: SCR-ATH-05 warning screen with Loading/Warning states, root card, debug card, Continue Anyway button to SCR-ATH-02. 84/84 backend tests passing.",
+      "assignedTo": "AI",
+      "tags": [
+        "frontend",
+        "security"
+      ]
+    },
+    {
+      "id": "task-025",
+      "title": "Unified Testing Suite Execution",
+      "description": "Initialize integrated Client and Server testing suites, execute automated validation checks, and verify complete PRD coverage.",
+      "status": "completed",
+      "priority": "P0",
+      "complexity": "high",
+      "estimatedHours": 16,
+      "dependencies": [
+        "task-001",
+        "task-002",
+        "task-003",
+        "task-004",
+        "task-005",
+        "task-006",
+        "task-007",
+        "task-008",
+        "task-009",
+        "task-010",
+        "task-011",
+        "task-012",
+        "task-013",
+        "task-014",
+        "task-015",
+        "task-016",
+        "task-017",
+        "task-018",
+        "task-019",
+        "task-020",
+        "task-021",
+        "task-022",
+        "task-023",
+        "task-024"
+      ],
+      "documentRefs": {
+        "apiEndpoints": [],
+        "dbTables": [],
+        "prdFeature": "N/A",
+        "screens": [],
+        "securityThreats": [],
+        "srsRequirement": "N/A",
+        "testCases": []
+      },
+      "files": [
+        "android-client/app/src/androidTest/java/com/securevault/app/VaultUITest.kt",
+        "backend-gateway/functions/tests/api.test.js"
+      ],
+      "createdDate": "2026-06-15",
+      "completedDate": "2026-06-19",
+      "actualHours": 3,
+      "notes": "api.test.js: 16 unified tests covering IT-AUTH-02 (VMK retrieval), IT-VAULT-05 (trash empty), ST-STRIDE-01 through ST-STRIDE-09 (STRIDE security audit), UAT-STUDENT-01 through UAT-GENERAL-01. VaultUITest.kt: 18 Espresso tests covering all SCR-* screens, FLAG_SECURE compliance, design token verification. Final result: 100/100 backend tests passing across 9 test suites. ALL 19 IT-IDs, 9 ST-IDs, 4 UAT-IDs covered.",
+      "assignedTo": "AI",
+      "tags": [
+        "testing"
+      ]
+    }
+  ],
+  "statusCategories": {
+    "pending": "Not started",
+    "in-progress": "Currently working on",
+    "blocked": "Waiting on dependency or clarification",
+    "completed": "Finished and verified",
+    "cancelled": "No longer needed"
+  }
+}

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Internet access required for Firebase Auth and API calls -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- For ANDROID_ID device binding — Security_Requirements.md §2.3 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"
+        android:maxSdkVersion="28" />
+
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+
+        <!--
+          LoginActivity — SCR-ONB-01, RT-ONB-01
+          Launcher entry point for first-time and unauthenticated users.
+          Routes.md RT-ONB-01 — Root Switch Navigator
+        -->
+        <activity
+            android:name=".ui.onboarding.LoginActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Stub activities — implemented in their respective tasks.
+          Declared here to allow LoginActivity to compile and launch intents.
+        -->
+        <!-- task-005: SecurityQuestionActivity -->
+        <activity
+            android:name=".ui.onboarding.SecurityQuestionActivity"
+            android:exported="false" />
+
+        <!-- task-006: PinUnlockActivity -->
+        <activity
+            android:name=".ui.onboarding.PinUnlockActivity"
+            android:exported="false" />
+
+        <!-- task-006: PinCreateActivity -->
+        <activity
+            android:name=".ui.onboarding.PinCreateActivity"
+            android:exported="false"
+            android:windowSoftInputMode="noSoftInputMode" />
+
+        <!-- task-006: PinUnlockActivity — daily lock screen -->
+        <activity
+            android:name=".ui.auth.PinUnlockActivity"
+            android:exported="false"
+            android:windowSoftInputMode="noSoftInputMode" />
+
+        <!-- task-006: BackupCodesActivity stub (implemented in task-008) -->
+        <activity
+            android:name=".ui.onboarding.BackupCodesActivity"
+            android:exported="false" />
+
+        <!-- task-006: ChallengeQuestionActivity (implemented in task-005) -->
+        <activity
+            android:name=".ui.auth.ChallengeQuestionActivity"
+            android:exported="false" />
+
+        <!-- task-007: LockoutActivity -->
+        <activity
+            android:name=".ui.auth.LockoutActivity"
+            android:exported="false"
+            android:windowSoftInputMode="noSoftInputMode" />
+
+        <!-- task-009: SecuritySettingsActivity (SCR-SET-02) -->
+        <activity
+            android:name=".ui.settings.SecuritySettingsActivity"
+            android:exported="false" />
+
+        <!-- task-010: CategoriesActivity (SCR-VLT-04) -->
+        <activity
+            android:name=".ui.vault.CategoriesActivity"
+            android:exported="false" />
+
+        <!-- task-011: AddEditCredentialActivity (SCR-VLT-02) -->
+        <activity
+            android:name=".ui.vault.AddEditCredentialActivity"
+            android:exported="false" />
+
+        <!-- task-011: CredentialDetailsActivity (SCR-VLT-03) -->
+        <activity
+            android:name=".ui.vault.CredentialDetailsActivity"
+            android:exported="false" />
+
+        <!-- task-014: DashboardActivity (SCR-VLT-01) -->
+        <activity
+            android:name=".ui.vault.DashboardActivity"
+            android:exported="false" />
+
+        <!-- task-016: GeneratorActivity (SCR-GEN-01) -->
+        <activity
+            android:name=".ui.generator.GeneratorActivity"
+            android:exported="false" />
+
+        <!-- task-017: HealthDashboardActivity (SCR-GEN-02) -->
+        <activity
+            android:name=".ui.generator.HealthDashboardActivity"
+            android:exported="false" />
+
+        <!-- task-019: ExportActivity (PRD F-EXP-01) -->
+        <activity
+            android:name=".ui.settings.ExportActivity"
+            android:exported="false" />
+
+        <!-- task-013: ClipboardClearService — SRS FR-VAULT-04b -->
+        <service
+            android:name=".service.ClipboardClearService"
+            android:exported="false" />
+
+        <!-- task-018: VaultAutofillService — PRD F-AUTO-01, SRS FR-AUTO-01a -->
+        <service
+            android:name=".service.VaultAutofillService"
+            android:exported="true"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE">
+
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service_config" />
+        </service>
+
+        <!-- task-019: FileProvider for PDF export Share Sheet — PRD F-EXP-01 AC#4 -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+</manifest>

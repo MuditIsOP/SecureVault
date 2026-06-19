@@ -1,0 +1,56 @@
+# Android Build Files
+.gradle/
+build/
+/*/build/
+local.properties
+.navigation/
+captures/
+
+# Keystores and private credentials — Security_Requirements.md §4 RESTRICTED
+*.keystore
+*.jks
+*.p12
+*.pem
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables — contains RESTRICTED secrets
+.env
+.env.local
+.env.production
+
+# Firebase — contains project secrets
+google-services.json
+firebase-debug.log
+.firebase/
+.firebaserc
+
+# IDE and System Files
+.idea/
+*.iml
+.DS_Store
+.vscode/
+Thumbs.db
+
+# SQLCipher database files — Security_Requirements.md §4 RESTRICTED
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Compiled output
+*.apk
+*.aab
+*.dex
+*.class
+
+# Crash logs
+crash-*.log
+
+# Test output
+test-results/
+coverage/

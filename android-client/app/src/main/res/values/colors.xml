@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Design tokens per task-004 spec:
+    primary:    #D0BCFF
+    on-primary: #381E72
+-->
+<resources>
+    <!-- Primary — task-004 design tokens -->
+    <color name="color_primary">#D0BCFF</color>
+    <color name="color_on_primary">#381E72</color>
+
+    <!-- Surface tokens -->
+    <color name="color_surface">#1C1B1F</color>
+    <color name="color_on_surface">#E6E1E5</color>
+    <color name="color_surface_variant">#49454F</color>
+    <color name="color_on_surface_variant">#CAC4D0</color>
+    <color name="color_secondary">#CCC2DC</color>
+    <!-- Error color — task-007 design token -->
+    <color name="color_error">#F2B8B5</color>
+    <!-- Background — Design.md §2.1 -->
+    <color name="color_background">#141218</color>
+    <!-- Warning — Design.md §2.1 -->
+    <color name="color_warning">#E3A857</color>
+</resources>

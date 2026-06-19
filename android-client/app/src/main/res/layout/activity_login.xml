@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCR-ONB-01 — Onboarding & Google Sign-In Screen layout.
+
+  Spec refs:
+    - Screens.md SCR-ONB-01 — content: Welcome Slides Carousel, Google Sign-In Button
+    - PRD F-AUTH-01 AC#1 — "display onboarding screens followed by a Sign in with Google button"
+    - Design tokens (task-004 spec): primary #D0BCFF, on-primary #381E72
+    - Screens.md SCR-ONB-01 States: Loading (progress_loading), Error (via Toast)
+    - Security_Requirements.md §1 [MUST] FLAG_SECURE — set in LoginActivity.onCreate()
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_surface"
+    tools:context=".ui.onboarding.LoginActivity">
+
+    <!-- Welcome carousel placeholder — slides provided as static resources -->
+    <!-- Screens.md SCR-ONB-01: "Welcome Slides Carousel" with pagination indicator -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vp_onboarding"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/ll_bottom_panel"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Bottom action panel -->
+    <LinearLayout
+        android:id="@+id/ll_bottom_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="48dp"
+        android:paddingTop="24dp">
+
+        <!-- App logo / branding -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/app_name"
+            android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+            android:textColor="@color/color_on_surface"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/login_tagline"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="@color/color_on_surface_variant"
+            android:layout_marginBottom="32dp" />
+
+        <!--
+          Google Sign-In Button
+          PRD F-AUTH-01 AC#2 — triggers Credential Manager overlay on tap
+          Design token: primary #D0BCFF, on-primary #381E72
+        -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_google_sign_in"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/sign_in_with_google"
+            android:textColor="@color/color_on_primary"
+            app:backgroundTint="@color/color_primary"
+            app:cornerRadius="28dp"
+            app:icon="@drawable/ic_google_logo"
+            app:iconGravity="textStart"
+            app:iconPadding="12dp" />
+
+    </LinearLayout>
+
+    <!--
+      Loading overlay — SCR-ONB-01 Loading state
+      Screens.md: "Loading: Disables buttons; displays a modal loading spinner."
+      Visibility toggled by LoginActivity.setLoadingState()
+    -->
+    <FrameLayout
+        android:id="@+id/progress_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            app:indicatorColor="@color/color_primary"
+            app:trackColor="@color/color_surface_variant" />
+
+    </FrameLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

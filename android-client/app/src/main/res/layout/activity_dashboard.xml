@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCR-VLT-01 — Password Dashboard Screen Layout
+  Design.md §2.1: background #141218, surface #1C1B1F, primary #D0BCFF
+  PRD F-VAULT-01 AC#1: Search Bar, Password List, FAB, Bottom Navigation
+  SCR-VLT-01 content inventory: Search bar, Password list (RecyclerView),
+    Empty state, FAB (+), Bottom Navigation (Dashboard, Categories, Settings)
+-->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_background"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top App Bar — SCR-VLT-01 "SecureVault" title -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_dashboard"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/color_surface"
+            app:title="SecureVault"
+            app:titleTextColor="@color/color_on_surface" />
+
+        <!-- Search Bar — PRD F-VAULT-01 AC#1 "Search Bar" -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            app:boxBackgroundColor="@color/color_surface_variant"
+            app:boxCornerRadiusTopStart="28dp"
+            app:boxCornerRadiusTopEnd="28dp"
+            app:boxCornerRadiusBottomStart="28dp"
+            app:boxCornerRadiusBottomEnd="28dp"
+            app:hintTextColor="@color/color_on_surface_variant"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Search passwords..."
+                android:textColor="@color/color_on_surface"
+                android:drawableStart="@android:drawable/ic_menu_search"
+                android:drawablePadding="8dp"
+                android:inputType="text"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Main content area -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- Password List — PRD F-VAULT-01 AC#1 "Password List" -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_credentials"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="80dp" />
+
+            <!-- Loading State — SCR-VLT-01 Loading state -->
+            <ProgressBar
+                android:id="@+id/progress_loading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Empty State — SCR-VLT-01 Empty state -->
+            <LinearLayout
+                android:id="@+id/layout_empty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                android:padding="32dp">
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:src="@android:drawable/ic_menu_agenda"
+                    android:alpha="0.3"
+                    android:contentDescription="No passwords" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="No passwords yet"
+                    android:textColor="@color/color_on_surface_variant"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Tap the + button to add your first password"
+                    android:textColor="@color/color_secondary"
+                    android:textSize="14sp"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <!-- Bottom Navigation — PRD F-VAULT-01 AC#1 "Bottom Navigation bar" -->
+        <!-- SCR-VLT-01: Dashboard, Categories, Settings tabs -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/color_surface"
+            app:itemTextColor="@color/color_on_surface_variant"
+            app:itemIconTint="@color/color_primary"
+            app:menu="@menu/bottom_nav_menu" />
+
+    </LinearLayout>
+
+    <!-- FAB — PRD F-VAULT-01 AC#1 "Floating Action Button (FAB) to add passwords" -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_credential"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="80dp"
+        android:src="@android:drawable/ic_input_add"
+        android:contentDescription="Add password"
+        app:backgroundTint="@color/color_primary"
+        app:tint="@color/color_on_primary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

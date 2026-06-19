@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dashboard toolbar menu — task-017
+  Provides access to Password Health Dashboard (SCR-GEN-02)
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- PRD F-GEN-02 — Health Dashboard access -->
+    <item
+        android:id="@+id/action_health"
+        android:icon="@android:drawable/ic_menu_manage"
+        android:title="Password Health"
+        app:showAsAction="ifRoom" />
+
+</menu>

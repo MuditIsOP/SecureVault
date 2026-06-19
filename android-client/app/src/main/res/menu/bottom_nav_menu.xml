@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bottom Navigation menu — SCR-VLT-01 "Bottom Navigation bar"
+  Items: Dashboard, Categories, Generator (F-GEN-01 AC#1), Settings
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_dashboard"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Dashboard" />
+
+    <item
+        android:id="@+id/nav_categories"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:title="Categories" />
+
+    <!-- PRD F-GEN-01 AC#1 — "accessible via Bottom Navigation Tab 3" -->
+    <item
+        android:id="@+id/nav_generator"
+        android:icon="@android:drawable/ic_menu_rotate"
+        android:title="Generator" />
+
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="Settings" />
+
+</menu>

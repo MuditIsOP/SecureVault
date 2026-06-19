@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SecureVault</string>
+    <string name="login_tagline">Your passwords, secured.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+
+    <!--
+      Google server client ID — replaced at build time via secrets.properties.
+      MUST NOT be hardcoded with real values — Technical_Requirements.md §8.
+      Populated via google-services.json or BuildConfig injection.
+    -->
+    <string name="google_server_client_id" translatable="false">YOUR_GOOGLE_SERVER_CLIENT_ID</string>
+</resources>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Export PDF screen — PRD F-EXP-01
+  Flow: Security question challenge → PDF password input → Generate → Share
+  Design.md: background #141218
+-->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Top App Bar -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar_export"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginBottom="24dp"
+            app:title="Export Vault"
+            app:titleTextColor="@color/color_on_surface"
+            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+            app:navigationIconTint="@color/color_on_surface" />
+
+        <!-- Step 1: Security Question Challenge — PRD F-EXP-01 AC#1 -->
+        <LinearLayout
+            android:id="@+id/layout_step_security"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Step 1: Verify Identity"
+                android:textColor="@color/color_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Answer your security question to proceed with the export."
+                android:textColor="@color/color_secondary"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_security_question"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:textColor="@color/color_on_surface"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text="" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:boxBackgroundColor="@color/color_surface"
+                app:boxStrokeColor="@color/color_surface_variant"
+                app:hintTextColor="@color/color_secondary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_security_answer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Your Answer"
+                    android:textColor="@color/color_on_surface"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_verify_answer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:text="Verify"
+                android:textColor="@color/color_on_primary"
+                app:backgroundTint="@color/color_primary"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+
+        <!-- Step 2: PDF Password — PRD F-EXP-01 AC#2 -->
+        <LinearLayout
+            android:id="@+id/layout_step_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Step 2: Set PDF Password"
+                android:textColor="@color/color_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Choose a password to protect your exported PDF file."
+                android:textColor="@color/color_secondary"
+                android:textSize="14sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:boxBackgroundColor="@color/color_surface"
+                app:boxStrokeColor="@color/color_surface_variant"
+                app:hintTextColor="@color/color_secondary"
+                app:endIconMode="password_toggle">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_pdf_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="PDF Password"
+                    android:textColor="@color/color_on_surface"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:boxBackgroundColor="@color/color_surface"
+                app:boxStrokeColor="@color/color_surface_variant"
+                app:hintTextColor="@color/color_secondary"
+                app:endIconMode="password_toggle">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_pdf_password_confirm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Confirm PDF Password"
+                    android:textColor="@color/color_on_surface"
+                    android:inputType="textPassword"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_generate_pdf"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:text="Generate PDF"
+                android:textColor="@color/color_on_primary"
+                app:backgroundTint="@color/color_primary"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+
+        <!-- Loading indicator -->
+        <ProgressBar
+            android:id="@+id/progress_export"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</ScrollView>

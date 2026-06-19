@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Autofill service configuration — task-018
+  PRD F-AUTO-01 AC#2: "credential suggestions in native apps and WebView"
+  Architecture.md: AutofillService Module
+-->
+<autofill-service xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- No settings activity for now; could add SCR-SET-XX in future -->
+</autofill-service>

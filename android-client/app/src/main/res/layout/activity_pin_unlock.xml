@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/color_surface"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/tv_professional_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Professional Secure Session"
+        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+        android:textColor="@color/color_primary"
+        android:visibility="gone"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter PIN to Unlock"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textColor="@color/color_on_surface"
+        android:layout_marginTop="48dp" />
+
+    <TextView
+        android:id="@+id/tv_delay_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="@color/color_error"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
+
+    <!-- PIN dot indicators -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginVertical="32dp">
+        <View android:id="@+id/dot_1" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@color/color_surface_variant" />
+        <View android:id="@+id/dot_2" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@color/color_surface_variant" />
+        <View android:id="@+id/dot_3" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@color/color_surface_variant" />
+        <View android:id="@+id/dot_4" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@color/color_surface_variant" />
+        <View android:id="@+id/dot_5" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@color/color_surface_variant" />
+        <View android:id="@+id/dot_6" android:layout_width="16dp" android:layout_height="16dp" android:layout_margin="8dp" android:background="@color/color_surface_variant" />
+    </LinearLayout>
+
+    <!-- Keypad layout -->
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:rowCount="4"
+        android:layout_gravity="center">
+
+        <Button android:id="@+id/key_1" android:text="1" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_2" android:text="2" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_3" android:text="3" android:layout_margin="8dp" />
+
+        <Button android:id="@+id/key_4" android:text="4" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_5" android:text="5" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_6" android:text="6" android:layout_margin="8dp" />
+
+        <Button android:id="@+id/key_7" android:text="7" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_8" android:text="8" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_9" android:text="9" android:layout_margin="8dp" />
+
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_0" android:text="0" android:layout_margin="8dp" />
+        <Button android:id="@+id/key_delete" android:text="DEL" android:layout_margin="8dp" />
+    </GridLayout>
+
+</LinearLayout>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SCR-VLT-04 — Categories Management Screen
+  Screens.md SCR-VLT-04: Category folder list, Add Category input
+  Design.md §2.1: background #141218, surface #1C1B1F, secondary #CCC2DC
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_background"
+    android:orientation="vertical">
+
+    <!-- Title — Design.md §2.2 Headline Medium 28sp -->
+    <TextView
+        android:id="@+id/tv_categories_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Categories"
+        android:textColor="@color/color_on_surface"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+
+    <!-- Add Category Input Row — SCR-VLT-04 content: "Add Category input" -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_category_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            app:boxBackgroundColor="@color/color_surface"
+            app:boxStrokeColor="@color/color_surface_variant"
+            app:hintTextColor="@color/color_secondary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_category_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="New category name"
+                android:textColor="@color/color_on_surface"
+                android:inputType="text"
+                android:maxLength="64"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add"
+            app:backgroundTint="@color/color_primary"
+            android:textColor="@color/color_on_primary" />
+
+    </LinearLayout>
+
+    <!-- Error / Warning Message — SCR-VLT-04 Error state -->
+    <TextView
+        android:id="@+id/tv_error_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_error"
+        android:textSize="12sp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone" />
+
+    <!-- Category list — SCR-VLT-04 content: "Category folder list" -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_categories"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:padding="16dp" />
+
+    <!-- Loading spinner — SCR-VLT-04 Loading state -->
+    <ProgressBar
+        android:id="@+id/progress_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- Empty state — SCR-VLT-04: "Shows default categories" -->
+    <TextView
+        android:id="@+id/tv_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No custom categories yet.\nDefault categories: Personal, Work, Banking, Shopping, Social"
+        android:textColor="@color/color_secondary"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone" />
+
+</LinearLayout>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/color_surface"
+    android:padding="24dp"
+    android:gravity="center"
+    android:keepScreenOn="true">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@android:drawable/ic_dialog_alert"
+        app:tint="@color/color_error"
+        android:layout_marginBottom="24dp"
+        android:contentDescription="Lockout Warning" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Vault Security Lockout"
+        android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+        android:textColor="@color/color_on_surface"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Too many failed PIN attempts. To protect your vault, access has been restricted."
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+        android:textColor="@color/color_on_surface_variant"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Countdown Timer (Display Large, Error Red #F2B8B5) -->
+    <TextView
+        android:id="@+id/tv_lockout_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="02:00:00"
+        android:textAppearance="@style/TextAppearance.Material3.DisplayLarge"
+        android:textColor="@color/color_error"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Remaining until entry is re-enabled"
+        android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+        android:textColor="@color/color_on_surface_variant" />
+
+    <!-- Spacer to push button to bottom -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Emergency Recovery Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_emergency_recovery"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Emergency Recovery"
+        android:textColor="@color/color_primary"
+        app:icon="@android:drawable/ic_menu_edit"
+        app:iconTint="@color/color_primary"
+        android:layout_marginBottom="16dp" />
+
+</LinearLayout>

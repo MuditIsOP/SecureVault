@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  FileProvider paths configuration — task-019
+  PRD F-EXP-01 AC#4: Share Sheet requires content:// URI via FileProvider
+  Grants access to the exports subdirectory in app cache.
+-->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- PDF export files in cache/exports/ -->
+    <cache-path
+        name="exports"
+        path="exports/" />
+</paths>
