@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -78,8 +79,11 @@ dependencies {
     // Local DB Encryption (SQLCipher v4.5.4)
     implementation("net.zetetic:android-database-sqlcipher:4.5.4@aar")
 
-    // Identity / Auth (Firebase Authentication v22.3.1)
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+    // Firebase — Bill of Materials for consistent versioning
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+
+    // Identity / Auth (Firebase Authentication — version managed by BoM)
+    implementation("com.google.firebase:firebase-auth-ktx")
 
     // Client Sign-In (Credential Manager API v1.2.1)
     implementation("androidx.credentials:credentials:1.2.1")
