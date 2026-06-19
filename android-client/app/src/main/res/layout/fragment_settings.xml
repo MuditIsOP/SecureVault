@@ -450,6 +450,21 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Logout Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="Log Out"
+            android:textSize="15sp"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            app:strokeColor="@color/color_error"
+            app:strokeWidth="1dp"
+            android:textColor="@color/color_error"
+            app:cornerRadius="14dp" />
+
         <!-- Loading overlay -->
         <ProgressBar
             android:id="@+id/progress_loading"

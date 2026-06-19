@@ -282,7 +282,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="✅ All passwords look good!"
+                        android:text="All passwords look good!"
                         android:textColor="#81C784"
                         android:textSize="16sp"
                         android:textStyle="bold" />

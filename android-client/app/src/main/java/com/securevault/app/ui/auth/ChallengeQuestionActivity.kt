@@ -71,7 +71,16 @@ class ChallengeQuestionActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_challenge_question)
 
-        val questionText = intent.getStringExtra(EXTRA_QUESTION_TEXT) ?: ""
+        var questionText = intent.getStringExtra(EXTRA_QUESTION_TEXT) ?: ""
+        // Fallback: read from SharedPreferences if intent didn't provide it
+        if (questionText.isEmpty()) {
+            questionText = getSharedPreferences("securevault_prefs", MODE_PRIVATE)
+                .getString("security_question_text", "") ?: ""
+        }
+        // Last resort fallback
+        if (questionText.isEmpty()) {
+            questionText = "Answer your security question"
+        }
         findViewById<TextView>(R.id.tv_security_question).text = questionText
 
         setupVerifyButton()

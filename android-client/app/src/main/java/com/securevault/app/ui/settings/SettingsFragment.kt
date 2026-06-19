@@ -85,6 +85,7 @@ class SettingsFragment : Fragment() {
         setupBiometricSwitch()
         setupAutofillSwitch()
         setupActionCards()
+        setupLogoutButton(view)
     }
 
     override fun onResume() {
@@ -314,5 +315,38 @@ class SettingsFragment : Fragment() {
         switchAutofill.isEnabled = !loading
         cardChangePin.isEnabled = !loading
         cardRegenerateCodes.isEnabled = !loading
+    }
+
+    // -------------------------------------------------------------------------
+    // Logout
+    // -------------------------------------------------------------------------
+
+    private fun setupLogoutButton(view: View) {
+        view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_logout)
+            .setOnClickListener {
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Log Out")
+                    .setMessage("Are you sure you want to log out? You'll need to sign in again to access your vault.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Log Out") { _, _ ->
+                        performLogout()
+                    }
+                    .show()
+            }
+    }
+
+    private fun performLogout() {
+        // Sign out of Firebase
+        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+
+        // Clear session token
+        com.securevault.app.data.api.SessionStore.clearToken()
+
+        // Navigate to login and clear the back stack
+        val intent = Intent(requireContext(),
+            com.securevault.app.ui.onboarding.LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        activity?.finish()
     }
 }

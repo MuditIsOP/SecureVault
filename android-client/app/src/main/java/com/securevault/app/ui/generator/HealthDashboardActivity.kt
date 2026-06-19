@@ -201,8 +201,8 @@ class HealthDashboardActivity : AppCompatActivity() {
 
         // Type label
         val typeIcon = when (recommendation.type) {
-            VaultHealthAuditor.RecommendationType.WEAK_PASSWORD -> "⚠️ Weak Passwords"
-            VaultHealthAuditor.RecommendationType.DUPLICATE_PASSWORD -> "🔁 Duplicate Passwords"
+            VaultHealthAuditor.RecommendationType.WEAK_PASSWORD -> "Weak Passwords"
+            VaultHealthAuditor.RecommendationType.DUPLICATE_PASSWORD -> "Duplicate Passwords"
         }
         val tvType = TextView(this).apply {
             text = typeIcon
