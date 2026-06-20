@@ -116,11 +116,22 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     /**
-     * The floating nav effect comes from the custom floating_nav_bg.xml drawable
-     * with high-opacity frosted glass background. No system-level changes needed.
+     * Initializes the frosted glass blur effect on the floating bottom nav.
+     * Uses BlurView library for real-time backdrop blur (like macOS frosted glass).
      */
     private fun setupFloatingNav() {
-        // Floating effect handled entirely by layout + drawable
+        val blurView = findViewById<eightbitlab.com.blurview.BlurView>(R.id.blur_view_nav)
+        val rootView = window.decorView.findViewById<android.view.ViewGroup>(android.R.id.content)
+
+        val blurAlgorithm = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            eightbitlab.com.blurview.RenderEffectBlur()
+        } else {
+            eightbitlab.com.blurview.RenderScriptBlur(this)
+        }
+
+        blurView.setupWith(rootView, blurAlgorithm)
+            .setBlurRadius(20f)
+            .setBlurAutoUpdate(true)
     }
 
     // -------------------------------------------------------------------------

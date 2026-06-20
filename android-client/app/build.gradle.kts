@@ -106,6 +106,9 @@ dependencies {
     // Image loading — for website favicon fetching (Google Favicon API)
     implementation("io.coil-kt:coil:2.5.0")
 
+    // Blur effect — frosted glass for floating nav bar
+    implementation("com.github.Dimezis:BlurView:version-2.0.5")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
