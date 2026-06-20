@@ -44,7 +44,7 @@ class CategoriesFragment : Fragment() {
     private lateinit var btnAddCategory: MaterialButton
     private lateinit var tvErrorMessage: TextView
     private lateinit var progressLoading: ProgressBar
-    private lateinit var tvEmptyState: TextView
+    private lateinit var tvEmptyState: View
 
     private val categories = mutableListOf<CategoryDisplayItem>()
     private lateinit var adapter: CategoryAdapter

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  SCR-VLT-04 — Categories Management Fragment Layout
-  Fragment version of activity_categories.xml (no toolbar)
-  Screens.md SCR-VLT-04: Category folder list, Add Category input
-  Design.md §2.1: background #141218, surface #1C1B1F, secondary #CCC2DC
+  SCR-VLT-04 — Categories Management Fragment Layout (Premium Redesign)
+  Fragment version for DashboardActivity bottom nav.
+  Design: Grouped cards, folder icons, modern Material 3 aesthetic.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -12,71 +11,89 @@
     android:background="@color/color_background"
     android:orientation="vertical">
 
-
-
-    <!-- Add Category Input Row — SCR-VLT-04 content: "Add Category input" -->
-    <LinearLayout
+    <!-- Add Category Input Row — Premium card style -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        app:cardBackgroundColor="@color/color_surface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/til_category_name"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            app:boxBackgroundColor="@color/color_surface"
-            app:boxStrokeColor="@color/color_surface_variant"
-            app:hintTextColor="@color/color_secondary">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_category_name"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_category_name"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="New category name"
-                android:textColor="@color/color_on_surface"
-                android:inputType="text"
-                android:maxLength="64"
-                android:maxLines="1" />
+                android:layout_weight="1"
+                android:layout_marginEnd="12dp"
+                app:boxBackgroundMode="none"
+                app:hintTextColor="@color/color_on_surface_variant"
+                app:hintAnimationEnabled="true">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_category_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="New category name"
+                    android:textColor="@color/color_on_surface"
+                    android:textColorHint="@color/color_on_surface_variant"
+                    android:inputType="text"
+                    android:maxLength="64"
+                    android:maxLines="1"
+                    android:background="@android:color/transparent" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_category"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add"
-            app:backgroundTint="@color/color_primary"
-            android:textColor="@color/color_on_primary" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-    </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_category"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Add"
+                android:textSize="13sp"
+                app:backgroundTint="@color/color_primary"
+                android:textColor="@color/color_on_primary"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_add"
+                app:iconSize="16dp"
+                app:iconTint="@color/color_on_primary"
+                app:iconPadding="4dp" />
 
-    <!-- Error / Warning Message — SCR-VLT-04 Error state -->
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Error / Warning Message -->
     <TextView
         android:id="@+id/tv_error_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/color_error"
         android:textSize="12sp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingHorizontal="20dp"
         android:visibility="gone" />
 
-    <!-- Category list — SCR-VLT-04 content: "Category folder list" -->
+    <!-- Category list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_categories"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:padding="16dp" />
+        android:paddingHorizontal="16dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="16dp" />
 
-    <!-- Loading spinner — SCR-VLT-04 Loading state -->
+    <!-- Loading spinner -->
     <ProgressBar
         android:id="@+id/progress_loading"
         android:layout_width="wrap_content"
@@ -84,16 +101,41 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 
-    <!-- Empty state — SCR-VLT-04: "Shows default categories" -->
-    <TextView
+    <!-- Empty state -->
+    <LinearLayout
         android:id="@+id/tv_empty_state"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No custom categories yet.\nDefault categories: Personal, Work, Banking, Shopping, Social"
-        android:textColor="@color/color_secondary"
-        android:textSize="14sp"
+        android:orientation="vertical"
         android:gravity="center"
-        android:padding="32dp"
-        android:visibility="gone" />
+        android:padding="48dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_nav_categories"
+            app:tint="@color/color_on_surface_variant"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Categories" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No custom categories yet"
+            android:textColor="@color/color_on_surface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Default categories: Personal, Work, Banking, Shopping, Social"
+            android:textColor="@color/color_on_surface_variant"
+            android:textSize="13sp"
+            android:gravity="center" />
+
+    </LinearLayout>
 
 </LinearLayout>
