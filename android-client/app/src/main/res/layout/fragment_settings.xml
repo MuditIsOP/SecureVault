@@ -463,7 +463,12 @@
             app:strokeColor="@color/color_error"
             app:strokeWidth="1dp"
             android:textColor="@color/color_error"
-            app:cornerRadius="14dp" />
+            app:cornerRadius="14dp"
+            app:icon="@drawable/ic_logout"
+            app:iconTint="@color/color_error"
+            app:iconSize="20dp"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
         <!-- Loading overlay -->
         <ProgressBar

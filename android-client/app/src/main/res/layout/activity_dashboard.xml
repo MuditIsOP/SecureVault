@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  SCR-VLT-01 — Password Dashboard Screen Layout
-  Design.md §2.1: background #141218, surface #1C1B1F, primary #D0BCFF
-  PRD F-VAULT-01 AC#1: Search Bar, Password List, FAB, Bottom Navigation
+  SCR-VLT-01 — Password Dashboard (Premium Redesign)
+  Cleaner toolbar with search icon, premium empty state, consistent styling.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -36,13 +35,13 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/search_bar_layout"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="12dp"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="8dp"
             android:visibility="gone"
             app:cardBackgroundColor="@color/color_surface"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="2dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
@@ -52,15 +51,14 @@
                 android:gravity="center_vertical"
                 android:paddingHorizontal="4dp">
 
-                <!-- Back arrow to close search -->
                 <ImageButton
                     android:id="@+id/btn_search_back"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:src="@drawable/ic_arrow_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Close search"
-                    android:padding="12dp"
+                    android:padding="10dp"
                     app:tint="@color/color_on_surface_variant" />
 
                 <EditText
@@ -72,21 +70,20 @@
                     android:hint="Search passwords..."
                     android:textColorHint="@color/color_on_surface_variant"
                     android:textColor="@color/color_on_surface"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     android:inputType="text"
                     android:imeOptions="actionSearch"
                     android:maxLines="1"
                     android:singleLine="true" />
 
-                <!-- Clear text button -->
                 <ImageButton
                     android:id="@+id/btn_search_clear"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:src="@drawable/ic_close"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="Clear search"
-                    android:padding="12dp"
+                    android:padding="10dp"
                     android:visibility="gone"
                     app:tint="@color/color_on_surface_variant" />
 
@@ -107,6 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
+                android:paddingTop="4dp"
                 android:paddingBottom="80dp" />
 
             <!-- Loading State -->
@@ -117,7 +115,7 @@
                 android:layout_gravity="center"
                 android:visibility="gone" />
 
-            <!-- Empty State -->
+            <!-- Empty State — Premium -->
             <LinearLayout
                 android:id="@+id/layout_empty"
                 android:layout_width="match_parent"
@@ -125,21 +123,30 @@
                 android:orientation="vertical"
                 android:gravity="center"
                 android:visibility="gone"
-                android:padding="32dp">
+                android:padding="40dp">
 
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/ic_nav_generator"
-                    android:alpha="0.25"
-                    android:contentDescription="No passwords"
-                    app:tint="@color/color_primary" />
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="88dp"
+                    android:layout_height="88dp"
+                    app:cardBackgroundColor="@color/color_surface"
+                    app:cardCornerRadius="44dp"
+                    app:cardElevation="0dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="22dp"
+                        android:src="@drawable/ic_lock"
+                        app:tint="@color/color_primary"
+                        android:contentDescription="No passwords" />
+
+                </com.google.android.material.card.MaterialCardView>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:text="No passwords yet"
+                    android:text="Your vault is empty"
                     android:textColor="@color/color_on_surface"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -165,7 +172,7 @@
             android:layout_weight="1"
             android:visibility="gone" />
 
-        <!-- Bottom Navigation — icons only, no labels, taller pill indicator -->
+        <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
@@ -190,6 +197,7 @@
         android:contentDescription="Add password"
         app:backgroundTint="@color/color_primary"
         app:tint="@color/color_on_primary"
-        app:fabSize="normal" />
+        app:fabSize="normal"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.FloatingActionButton" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

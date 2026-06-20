@@ -40,16 +40,17 @@
                 <TextView
                     android:id="@+id/tv_generated_password"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="64dp"
                     android:gravity="center"
                     android:textColor="@color/color_on_surface"
-                    android:textSize="22sp"
                     android:fontFamily="monospace"
                     android:letterSpacing="0.05"
-                    android:lineSpacingExtra="6dp"
-                    android:breakStrategy="balanced"
-                    android:minLines="2"
-                    android:text="Tap Generate" />
+                    android:maxLines="2"
+                    android:text="Tap Generate"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="12sp"
+                    app:autoSizeMaxTextSize="22sp"
+                    app:autoSizeStepGranularity="1sp" />
 
                 <!-- Strength Meter -->
                 <ProgressBar
