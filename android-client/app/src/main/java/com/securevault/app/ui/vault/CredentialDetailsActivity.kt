@@ -268,7 +268,11 @@ class CredentialDetailsActivity : AppCompatActivity() {
                     // Eye Icon toggle — F-VAULT-03 AC#3
                     val btnRevealHistory = ImageButton(this@CredentialDetailsActivity).apply {
                         setImageResource(android.R.drawable.ic_menu_view)
-                        setBackgroundResource(android.R.attr.selectableItemBackgroundBorderless)
+                        val attrs = intArrayOf(android.R.attr.selectableItemBackgroundBorderless)
+                        val ta = context.obtainStyledAttributes(attrs)
+                        val bg = ta.getDrawable(0)
+                        ta.recycle()
+                        background = bg
                         contentDescription = "Reveal history password"
                         layoutParams = android.widget.LinearLayout.LayoutParams(
                             dpToPx(36), dpToPx(36)
