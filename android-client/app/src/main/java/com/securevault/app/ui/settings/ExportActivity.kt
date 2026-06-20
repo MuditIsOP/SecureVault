@@ -71,7 +71,7 @@ class ExportActivity : AppCompatActivity() {
     private lateinit var etPdfPasswordConfirm: TextInputEditText
     private lateinit var btnGeneratePdf: MaterialButton
 
-    private var storedQuestionHash: String = ""
+    // storedQuestionHash removed — question text now read from SharedPreferences
     private var storedAnswerHash: String = ""
 
     /** Export type: "pdf" or "csv" — determined by EXTRA_EXPORT_TYPE intent */
@@ -141,33 +141,29 @@ class ExportActivity : AppCompatActivity() {
                     }
                 }
 
-                // Load security question from users table (set in task-005)
-                val questionData = withContext(Dispatchers.IO) {
+                // Load security answer hash from users table
+                val answerHash = withContext(Dispatchers.IO) {
                     val cursor = db.openHelper.readableDatabase
                         .query(
-                            "SELECT security_question, security_answer_hash FROM users WHERE id = ?",
+                            "SELECT security_answer_hash FROM users WHERE id = ?",
                             arrayOf(userId)
                         )
                     cursor.use {
-                        if (it.moveToFirst()) {
-                            Pair(
-                                it.getString(0) ?: "",
-                                it.getString(1) ?: ""
-                            )
-                        } else {
-                            Pair("", "")
-                        }
+                        if (it.moveToFirst()) it.getString(0) ?: "" else ""
                     }
                 }
 
-                storedQuestionHash = questionData.first
-                storedAnswerHash = questionData.second
+                storedAnswerHash = answerHash
 
-                if (storedQuestionHash.isEmpty()) {
+                // Load question text from SharedPreferences (where onboarding saves it)
+                val questionText = getSharedPreferences("securevault_prefs", MODE_PRIVATE)
+                    .getString("security_question_text", "") ?: ""
+
+                if (questionText.isEmpty()) {
                     tvSecurityQuestion.text = "No security question configured."
                     btnVerifyAnswer.isEnabled = false
                 } else {
-                    tvSecurityQuestion.text = storedQuestionHash
+                    tvSecurityQuestion.text = questionText
                 }
 
             } catch (e: Exception) {
@@ -186,9 +182,8 @@ class ExportActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Verify answer hash — task-005 stores SHA-256 hash
-            val answerHash = hashAnswer(answer)
-            if (answerHash == storedAnswerHash) {
+            // Verify using PBKDF2 (matches how answer was hashed during onboarding)
+            if (com.securevault.app.security.SecurityQuestionHasher.verify(answer, storedAnswerHash)) {
                 // Security_Requirements.md §9.1 — clear answer from memory
                 etSecurityAnswer.setText("")
 
@@ -211,15 +206,6 @@ class ExportActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    /**
-     * SHA-256 hash of the security answer — matches task-005 storage format.
-     */
-    private fun hashAnswer(answer: String): String {
-        val digest = java.security.MessageDigest.getInstance("SHA-256")
-        val hash = digest.digest(answer.lowercase().trim().toByteArray())
-        return hash.joinToString("") { "%02x".format(it) }
     }
 
     // -------------------------------------------------------------------------

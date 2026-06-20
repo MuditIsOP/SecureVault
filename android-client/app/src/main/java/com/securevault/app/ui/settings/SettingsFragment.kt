@@ -342,6 +342,29 @@ class SettingsFragment : Fragment() {
         // Clear session token
         com.securevault.app.data.api.SessionStore.clearToken()
 
+        // Clear local PIN hash so re-login goes through security question flow
+        try {
+            val db = com.securevault.app.data.DatabaseModule.provideDatabase(requireContext())
+            db.openHelper.writableDatabase.execSQL(
+                "UPDATE users SET pin_hash = '', pin_failed_attempts = 0, pin_lockout_until = NULL"
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsFragment", "Failed to clear PIN: ${e.message}")
+        }
+
+        // Clear SharedPreferences but preserve security question text (needed for re-login)
+        val prefs = requireContext().getSharedPreferences("securevault_prefs", android.content.Context.MODE_PRIVATE)
+        val questionText = prefs.getString("security_question_text", "") ?: ""
+        prefs.edit().clear().apply()
+        if (questionText.isNotEmpty()) {
+            prefs.edit().putString("security_question_text", questionText).apply()
+        }
+
+        // Delete VMK key — new key will be created on re-login
+        com.securevault.app.security.KeystoreManager.deleteKey(
+            com.securevault.app.security.KeystoreManager.VMK_KEY_ALIAS
+        )
+
         // Navigate to login and clear the back stack
         val intent = Intent(requireContext(),
             com.securevault.app.ui.onboarding.LoginActivity::class.java)

@@ -57,6 +57,23 @@ class PinCreateActivity : AppCompatActivity() {
     // Dot indicator views — Design.md §3.2 PIN Dot Indicators
     private val dotViews = ArrayList<android.view.View>(6)
 
+    /** Launcher for ChallengeQuestionActivity when re-login requires security question */
+    private val challengeLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // Security question verified — allow PIN creation
+            android.util.Log.i(TAG, "Security question verified, proceeding to PIN creation")
+        } else {
+            // Failed or cancelled — go back to login
+            Toast.makeText(this, "Security question verification required.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,6 +88,20 @@ class PinCreateActivity : AppCompatActivity() {
         bindDotViews()
         bindKeypad()
         updateTitle()
+
+        // If re-login after logout, verify security question first
+        if (intent.getBooleanExtra("require_security_question", false)) {
+            launchSecurityChallenge()
+        }
+    }
+
+    private fun launchSecurityChallenge() {
+        val questionText = getSharedPreferences("securevault_prefs", MODE_PRIVATE)
+            .getString("security_question_text", "") ?: ""
+
+        val intent = Intent(this, com.securevault.app.ui.auth.ChallengeQuestionActivity::class.java)
+        intent.putExtra(com.securevault.app.ui.auth.ChallengeQuestionActivity.EXTRA_QUESTION_TEXT, questionText)
+        challengeLauncher.launch(intent)
     }
 
     // -------------------------------------------------------------------------

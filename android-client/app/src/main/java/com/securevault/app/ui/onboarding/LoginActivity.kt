@@ -327,8 +327,9 @@ class LoginActivity : AppCompatActivity() {
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                 } else {
-                    // No local PIN — go to PIN creation (skip security question on same device)
+                    // No local PIN (new device or logged out) — verify security question first
                     val intent = Intent(this@LoginActivity, PinCreateActivity::class.java)
+                    intent.putExtra("require_security_question", true)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                 }
