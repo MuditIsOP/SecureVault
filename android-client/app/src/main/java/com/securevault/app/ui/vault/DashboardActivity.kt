@@ -111,7 +111,20 @@ class DashboardActivity : AppCompatActivity() {
         setupFab()
         setupSearch()
         setupBottomNavigation()
+        setupFloatingNav()
         observeViewModel()
+    }
+
+    /**
+     * Configures transparent system navigation bar for true floating effect.
+     * Semi-transparent floating_nav_bg.xml provides the glassmorphism look.
+     */
+    private fun setupFloatingNav() {
+        // Transparent system navigation bar for floating effect
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        }
     }
 
     // -------------------------------------------------------------------------

@@ -192,9 +192,9 @@
         android:background="@drawable/floating_nav_bg"
         android:elevation="8dp"
         app:itemIconTint="@color/bottom_nav_icon_tint"
-        app:itemIconSize="26dp"
+        app:itemIconSize="24dp"
         app:labelVisibilityMode="unlabeled"
-        app:itemActiveIndicatorStyle="@style/Widget.Material3.BottomNavigationView.ActiveIndicator"
+        app:itemActiveIndicatorStyle="@style/Widget.SecureVault.BottomNav.ActiveIndicator"
         app:menu="@menu/bottom_nav_menu" />
 
     <!-- FAB -->
