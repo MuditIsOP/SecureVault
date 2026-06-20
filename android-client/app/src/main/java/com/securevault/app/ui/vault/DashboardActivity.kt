@@ -123,28 +123,22 @@ class DashboardActivity : AppCompatActivity() {
 
     /**
      * Migrates the VMK key from auth-required (300s timeout) to no-auth.
-     * Must run right after PIN unlock when the old key's auth window is still fresh.
-     * Re-encrypts all passwords with the new non-auth key.
+     * Uses a SharedPreferences flag since we can't detect key auth type
+     * when within the auth window (the key works fine either way).
      */
     private fun migrateVmkKeyIfNeeded() {
-        if (!KeystoreManager.keyExists(KeystoreManager.VMK_KEY_ALIAS)) return
+        val prefs = getSharedPreferences("securevault_prefs", MODE_PRIVATE)
+        if (prefs.getBoolean("vmk_migrated_v2", false)) return
+        if (!KeystoreManager.keyExists(KeystoreManager.VMK_KEY_ALIAS)) {
+            prefs.edit().putBoolean("vmk_migrated_v2", true).apply()
+            return
+        }
 
         lifecycleScope.launch {
             try {
                 val oldKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
 
-                // Test if key works without auth (already migrated)
-                try {
-                    val testCipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
-                    testCipher.init(javax.crypto.Cipher.ENCRYPT_MODE, oldKey)
-                    // Key works without auth — already migrated
-                    return@launch
-                } catch (e: android.security.keystore.UserNotAuthenticatedException) {
-                    // Old auth-required key — needs migration
-                    android.util.Log.i("DashboardActivity", "Migrating VMK key...")
-                }
-
-                // Within auth window: read all passwords via raw SQL
+                // Decrypt all passwords with old key (works within auth window after PIN)
                 val db = DatabaseModule.provideDatabase(this@DashboardActivity)
                 val decryptedMap = withContext(Dispatchers.IO) {
                     val map = mutableMapOf<String, String>()
@@ -180,12 +174,16 @@ class DashboardActivity : AppCompatActivity() {
                     }
                 }
 
+                // Mark migration complete
+                prefs.edit().putBoolean("vmk_migrated_v2", true).apply()
                 android.util.Log.i("DashboardActivity", "VMK migration done: ${decryptedMap.size} passwords")
 
-            } catch (e: android.security.keystore.UserNotAuthenticatedException) {
-                android.util.Log.w("DashboardActivity", "VMK migration deferred: auth expired")
+                // Refresh the list to show decrypted data
+                viewModel.refresh()
+
             } catch (e: Exception) {
-                android.util.Log.e("DashboardActivity", "VMK migration error: ${e.message}")
+                android.util.Log.e("DashboardActivity", "VMK migration error: ${e.message}", e)
+                // Don't mark as complete — retry next launch
             }
         }
     }
