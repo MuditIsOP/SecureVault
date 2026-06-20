@@ -115,12 +115,11 @@ object BiometricHelper {
     fun setBiometricEnabled(context: Context, enabled: Boolean) {
         if (enabled) {
             // Generate a fresh biometric-bound key in Keystore
-            // setInvalidatedByBiometricEnrollment(true) is already configured
-            // in KeystoreManager.generateVmkWrappingKey()
-            KeystoreManager.generateVmkWrappingKey()
+            // Uses dedicated per-operation key separate from VMK
+            KeystoreManager.generateBiometricKey()
         } else {
             // Delete the biometric key when disabling
-            KeystoreManager.deleteKey(KeystoreManager.VMK_KEY_ALIAS)
+            KeystoreManager.deleteKey(KeystoreManager.BIOMETRIC_KEY_ALIAS)
         }
         getPrefs(context).edit().putBoolean(KEY_BIOMETRIC_ENABLED, enabled).apply()
     }
@@ -130,7 +129,7 @@ object BiometricHelper {
      * PRD F-AUTH-06 AC#3 — user must re-authenticate via PIN + Security Question.
      */
     fun clearBiometricState(context: Context) {
-        KeystoreManager.deleteKey(KeystoreManager.VMK_KEY_ALIAS)
+        KeystoreManager.deleteKey(KeystoreManager.BIOMETRIC_KEY_ALIAS)
         getPrefs(context).edit().putBoolean(KEY_BIOMETRIC_ENABLED, false).apply()
     }
 
@@ -141,8 +140,8 @@ object BiometricHelper {
     /**
      * Shows the system BiometricPrompt for authentication.
      *
-     * Uses [BiometricPrompt.CryptoObject] bound to the VMK Keystore key to ensure
-     * cryptographic proof of biometric authentication.
+     * Uses [BiometricPrompt.CryptoObject] bound to the dedicated biometric
+     * Keystore key to ensure cryptographic proof of biometric authentication.
      *
      * If the key has been invalidated (new fingerprint enrolled), catches
      * [KeyPermanentlyInvalidatedException] and returns [BiometricResult.KeyInvalidated].
@@ -159,21 +158,29 @@ object BiometricHelper {
         onResult: (BiometricResult) -> Unit
     ) {
         // Attempt to initialize Cipher with the biometric-bound Keystore key
-        val cipher: Cipher
-        try {
-            val key: SecretKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
-            cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.ENCRYPT_MODE, key)
+        val cipher: Cipher? = try {
+            val key: SecretKey = KeystoreManager.getKey(KeystoreManager.BIOMETRIC_KEY_ALIAS)
+            Cipher.getInstance("AES/GCM/NoPadding").also { it.init(Cipher.ENCRYPT_MODE, key) }
         } catch (e: KeyPermanentlyInvalidatedException) {
             // ST-STRIDE-04: Key invalidated due to new biometric enrollment
             // PRD F-AUTH-06 AC#3: Force PIN + Security Question fallback
             clearBiometricState(activity)
             onResult(BiometricResult.KeyInvalidated)
             return
+        } catch (e: java.security.KeyStoreException) {
+            // Key does not exist — regenerate and retry once
+            try {
+                KeystoreManager.generateBiometricKey()
+                val key: SecretKey = KeystoreManager.getKey(KeystoreManager.BIOMETRIC_KEY_ALIAS)
+                Cipher.getInstance("AES/GCM/NoPadding").also { it.init(Cipher.ENCRYPT_MODE, key) }
+            } catch (e2: Exception) {
+                onResult(BiometricResult.Error(-1, "Biometric key unavailable: ${e2.message}"))
+                return
+            }
         } catch (e: Exception) {
-            // Key does not exist or other Keystore error
-            clearBiometricState(activity)
-            onResult(BiometricResult.Error(-1, "Biometric key unavailable: ${e.message}"))
+            // Other Keystore error — do NOT clear biometric state
+            // Just report the error so user can retry
+            onResult(BiometricResult.Error(-1, "Biometric error: ${e.message}"))
             return
         }
 
@@ -221,6 +228,6 @@ object BiometricHelper {
             .setConfirmationRequired(true)
             .build()
 
-        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
+        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher!!))
     }
 }

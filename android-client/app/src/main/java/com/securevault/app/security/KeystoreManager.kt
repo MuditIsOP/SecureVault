@@ -47,6 +47,13 @@ object KeystoreManager {
      */
     const val VMK_KEY_ALIAS = "securevault_vmk_key"
 
+    /**
+     * Alias for the dedicated biometric authentication key.
+     * Per-operation auth — only usable via BiometricPrompt CryptoObject.
+     * Separate from VMK to prevent auth timeout from disabling biometrics.
+     */
+    const val BIOMETRIC_KEY_ALIAS = "securevault_biometric_key"
+
     private val keyStore: KeyStore by lazy {
         KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
     }
@@ -116,6 +123,40 @@ object KeystoreManager {
             .setUserAuthenticationParameters(300, KeyProperties.AUTH_BIOMETRIC_STRONG or
                     KeyProperties.AUTH_DEVICE_CREDENTIAL)
             // Invalidate if new fingerprint enrolled — Security_Requirements.md §1 STRIDE
+            .setInvalidatedByBiometricEnrollment(true)
+            .build()
+
+        keyGenerator.init(spec)
+        return keyGenerator.generateKey()
+    }
+
+    /**
+     * Generates a dedicated biometric authentication key.
+     *
+     * This key is per-operation (no timeout) so it can ONLY be used
+     * inside a BiometricPrompt CryptoObject. This prevents the issue
+     * where a timeout-based key throws UserNotAuthenticatedException
+     * and accidentally disables biometrics.
+     *
+     * setInvalidatedByBiometricEnrollment(true) ensures new fingerprint
+     * enrollment invalidates this key — Security_Requirements.md §1 STRIDE.
+     */
+    fun generateBiometricKey(): SecretKey {
+        val keyGenerator = KeyGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_AES,
+            ANDROID_KEYSTORE
+        )
+        val spec = KeyGenParameterSpec.Builder(
+            BIOMETRIC_KEY_ALIAS,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+            .setKeySize(256)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .setRandomizedEncryptionRequired(true)
+            .setUserAuthenticationRequired(true)
+            // Per-operation: 0 timeout means BiometricPrompt must be used each time
+            .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
             .setInvalidatedByBiometricEnrollment(true)
             .build()
 
