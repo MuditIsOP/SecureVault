@@ -389,15 +389,26 @@ class CredentialDetailsActivity : AppCompatActivity() {
             isPasswordRevealed = true
 
         } catch (e: android.security.keystore.UserNotAuthenticatedException) {
-            // VMK auth window (300s) expired — re-prompt for PIN/biometric
+            // VMK auth window expired — re-prompt for PIN/biometric
             promptReAuthentication()
+        } catch (e: javax.crypto.AEADBadTagException) {
+            // Password was encrypted with a different key — unrecoverable
+            AlertDialog.Builder(this)
+                .setTitle("Password Unreadable")
+                .setMessage("This password was encrypted with a previous key and cannot be decrypted. You'll need to re-enter it.")
+                .setPositiveButton("Edit") { _, _ ->
+                    val intent = Intent(this, AddEditCredentialActivity::class.java)
+                    intent.putExtra(AddEditCredentialActivity.EXTRA_CREDENTIAL_ID, credentialId)
+                    editLauncher.launch(intent)
+                }
+                .setNegativeButton("OK", null)
+                .show()
         } catch (e: Exception) {
-            // Genuine key mismatch or corruption
+            // Other decryption error
             AlertDialog.Builder(this)
                 .setTitle("Decryption Error")
-                .setMessage("Could not decrypt password. The encryption key may have changed. Try re-authenticating.")
-                .setPositiveButton("Re-authenticate") { _, _ -> promptReAuthentication() }
-                .setNegativeButton("Cancel", null)
+                .setMessage("Could not decrypt: ${e.javaClass.simpleName}")
+                .setPositiveButton("OK", null)
                 .show()
         }
     }
