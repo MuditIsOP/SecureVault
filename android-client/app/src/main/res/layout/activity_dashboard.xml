@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  SCR-VLT-01 — Password Dashboard (Premium Redesign)
-  Cleaner toolbar with search icon, premium empty state, consistent styling.
+  SCR-VLT-01 — Password Dashboard (Premium Redesign v2)
+  Floating glassmorphism bottom nav, cleaner layout.
 -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,7 +16,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Top App Bar — bold title, search + health icons -->
+        <!-- Top App Bar -->
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar_dashboard"
             android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             app:titleTextColor="@color/color_on_surface"
             app:titleMarginStart="16dp" />
 
-        <!-- Inline Search Bar — replaces toolbar when active -->
+        <!-- Inline Search Bar -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/search_bar_layout"
             android:layout_width="match_parent"
@@ -105,7 +105,7 @@
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingTop="4dp"
-                android:paddingBottom="80dp" />
+                android:paddingBottom="96dp" />
 
             <!-- Loading State -->
             <ProgressBar
@@ -130,7 +130,9 @@
                     android:layout_height="88dp"
                     app:cardBackgroundColor="@color/color_surface"
                     app:cardCornerRadius="44dp"
-                    app:cardElevation="0dp">
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/color_surface_variant"
+                    app:strokeWidth="1dp">
 
                     <ImageView
                         android:layout_width="match_parent"
@@ -172,18 +174,28 @@
             android:layout_weight="1"
             android:visibility="gone" />
 
-        <!-- Bottom Navigation -->
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottom_navigation"
+        <!-- Spacer for floating nav overlap -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:background="@color/color_surface"
-            app:itemIconTint="@color/bottom_nav_icon_tint"
-            app:itemIconSize="28dp"
-            app:labelVisibilityMode="unlabeled"
-            app:menu="@menu/bottom_nav_menu" />
+            android:layout_height="16dp" />
 
     </LinearLayout>
+
+    <!-- Floating Glassmorphism Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/floating_nav_bg"
+        android:elevation="8dp"
+        app:itemIconTint="@color/bottom_nav_icon_tint"
+        app:itemIconSize="26dp"
+        app:labelVisibilityMode="unlabeled"
+        app:itemActiveIndicatorStyle="@style/Widget.Material3.BottomNavigationView.ActiveIndicator"
+        app:menu="@menu/bottom_nav_menu" />
 
     <!-- FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -191,13 +203,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="92dp"
         android:src="@drawable/ic_add"
         android:contentDescription="Add password"
         app:backgroundTint="@color/color_primary"
         app:tint="@color/color_on_primary"
-        app:fabSize="normal"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Material3.FloatingActionButton" />
+        app:fabSize="normal" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
