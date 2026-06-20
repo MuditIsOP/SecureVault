@@ -22,7 +22,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.EditText
 import android.widget.ImageButton
 import com.securevault.app.R
+import com.securevault.app.data.DatabaseModule
+import com.securevault.app.security.CryptographyHelper
+import com.securevault.app.security.KeystoreManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * SCR-VLT-01 — Password Dashboard Screen.
@@ -112,7 +117,77 @@ class DashboardActivity : AppCompatActivity() {
         setupSearch()
         setupBottomNavigation()
         setupFloatingNav()
+        migrateVmkKeyIfNeeded()
         observeViewModel()
+    }
+
+    /**
+     * Migrates the VMK key from auth-required (300s timeout) to no-auth.
+     * Must run right after PIN unlock when the old key's auth window is still fresh.
+     * Re-encrypts all passwords with the new non-auth key.
+     */
+    private fun migrateVmkKeyIfNeeded() {
+        if (!KeystoreManager.keyExists(KeystoreManager.VMK_KEY_ALIAS)) return
+
+        lifecycleScope.launch {
+            try {
+                val oldKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+
+                // Test if key works without auth (already migrated)
+                try {
+                    val testCipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+                    testCipher.init(javax.crypto.Cipher.ENCRYPT_MODE, oldKey)
+                    // Key works without auth — already migrated
+                    return@launch
+                } catch (e: android.security.keystore.UserNotAuthenticatedException) {
+                    // Old auth-required key — needs migration
+                    android.util.Log.i("DashboardActivity", "Migrating VMK key...")
+                }
+
+                // Within auth window: read all passwords via raw SQL
+                val db = DatabaseModule.provideDatabase(this@DashboardActivity)
+                val decryptedMap = withContext(Dispatchers.IO) {
+                    val map = mutableMapOf<String, String>()
+                    val cursor = db.openHelper.readableDatabase.query(
+                        "SELECT id, encrypted_password FROM vault_passwords WHERE deleted_at IS NULL"
+                    )
+                    cursor.use {
+                        while (it.moveToNext()) {
+                            val id = it.getString(0)
+                            val encPwd = it.getString(1)
+                            try {
+                                map[id] = CryptographyHelper.decrypt(encPwd, oldKey)
+                            } catch (e: Exception) {
+                                android.util.Log.w("DashboardActivity", "Skip cred $id: ${e.message}")
+                            }
+                        }
+                    }
+                    map
+                }
+
+                // Delete old key, generate new one without auth
+                KeystoreManager.deleteKey(KeystoreManager.VMK_KEY_ALIAS)
+                val newKey = KeystoreManager.generateVmkWrappingKey()
+
+                // Re-encrypt all passwords with new key
+                withContext(Dispatchers.IO) {
+                    for ((id, plaintext) in decryptedMap) {
+                        val reEncrypted = CryptographyHelper.encrypt(plaintext, newKey)
+                        db.openHelper.writableDatabase.execSQL(
+                            "UPDATE vault_passwords SET encrypted_password = ? WHERE id = ?",
+                            arrayOf(reEncrypted, id)
+                        )
+                    }
+                }
+
+                android.util.Log.i("DashboardActivity", "VMK migration done: ${decryptedMap.size} passwords")
+
+            } catch (e: android.security.keystore.UserNotAuthenticatedException) {
+                android.util.Log.w("DashboardActivity", "VMK migration deferred: auth expired")
+            } catch (e: Exception) {
+                android.util.Log.e("DashboardActivity", "VMK migration error: ${e.message}")
+            }
+        }
     }
 
     /**

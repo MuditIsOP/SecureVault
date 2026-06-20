@@ -388,12 +388,16 @@ class CredentialDetailsActivity : AppCompatActivity() {
             tvPassword.text = decryptedPassword
             isPasswordRevealed = true
 
+        } catch (e: android.security.keystore.UserNotAuthenticatedException) {
+            // VMK auth window (300s) expired — re-prompt for PIN/biometric
+            promptReAuthentication()
         } catch (e: Exception) {
-            // SCR-VLT-03 Error state: "Decryption error. Local key mismatch." dialog
+            // Genuine key mismatch or corruption
             AlertDialog.Builder(this)
                 .setTitle("Decryption Error")
-                .setMessage("Decryption error. Local key mismatch.")
-                .setPositiveButton("OK", null)
+                .setMessage("Could not decrypt password. The encryption key may have changed. Try re-authenticating.")
+                .setPositiveButton("Re-authenticate") { _, _ -> promptReAuthentication() }
+                .setNegativeButton("Cancel", null)
                 .show()
         }
     }
@@ -510,5 +514,16 @@ class CredentialDetailsActivity : AppCompatActivity() {
                 if (it.moveToFirst()) it.getString(0) else ""
             }
         }
+    }
+
+    /**
+     * Redirects to PIN unlock to re-authenticate when VMK auth window has expired.
+     */
+    private fun promptReAuthentication() {
+        Toast.makeText(this, "Session expired. Please re-authenticate.", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, com.securevault.app.ui.auth.PinUnlockActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }

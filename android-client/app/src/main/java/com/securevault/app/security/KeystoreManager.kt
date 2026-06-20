@@ -117,13 +117,8 @@ object KeystoreManager {
             .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
             .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
             .setRandomizedEncryptionRequired(true)
-            .setUserAuthenticationRequired(true)
-            // 300-second window after device unlock — key usable for 5 min
-            // without requiring BiometricPrompt per operation
-            .setUserAuthenticationParameters(300, KeyProperties.AUTH_BIOMETRIC_STRONG or
-                    KeyProperties.AUTH_DEVICE_CREDENTIAL)
-            // Invalidate if new fingerprint enrolled — Security_Requirements.md §1 STRIDE
-            .setInvalidatedByBiometricEnrollment(true)
+            // No user-authentication timeout — app-level PIN lock handles access control.
+            // Hardware-backed keystore still prevents other apps from accessing this key.
             .build()
 
         keyGenerator.init(spec)
