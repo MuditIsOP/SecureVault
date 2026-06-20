@@ -13,6 +13,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.securevault.app.R
@@ -85,6 +89,8 @@ class SettingsFragment : Fragment() {
         setupBiometricSwitch()
         setupAutofillSwitch()
         setupActionCards()
+        setupChangeSecurityQuestion(view)
+        setupDeleteAccount(view)
         setupLogoutButton(view)
     }
 
@@ -130,7 +136,7 @@ class SettingsFragment : Fragment() {
             pendingBiometricEnable = false
         }
 
-        // Security question challenge result — for Change PIN / Regenerate Codes
+        // Security question challenge result — for Change PIN / Regenerate Codes / Change Security Question
         challengeLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -153,6 +159,13 @@ class SettingsFragment : Fragment() {
                             Toast.makeText(requireContext(), "Backup codes screen not available",
                                 Toast.LENGTH_SHORT).show()
                         }
+                    }
+                    "change_security_question" -> {
+                        // Launch SecurityQuestionActivity to set new question
+                        val intent = Intent(requireContext(),
+                            com.securevault.app.ui.onboarding.SecurityQuestionActivity::class.java)
+                        intent.putExtra("is_change", true)
+                        startActivity(intent)
                     }
                 }
             }
@@ -333,6 +346,186 @@ class SettingsFragment : Fragment() {
                     }
                     .show()
             }
+    }
+
+    // -------------------------------------------------------------------------
+    // Change Security Question
+    // -------------------------------------------------------------------------
+
+    private fun setupChangeSecurityQuestion(view: View) {
+        view.findViewById<View>(R.id.card_change_security_question)?.setOnClickListener {
+            // Show choice: verify with current answer or backup code
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Verify Identity")
+                .setMessage("How would you like to verify your identity?")
+                .setPositiveButton("Security Answer") { _, _ ->
+                    pendingChallengeAction = "change_security_question"
+                    val intent = Intent(requireContext(), ChallengeQuestionActivity::class.java)
+                    intent.putExtra(ChallengeQuestionActivity.EXTRA_QUESTION_TEXT, getSavedQuestionText())
+                    challengeLauncher.launch(intent)
+                }
+                .setNeutralButton("Backup Code") { _, _ ->
+                    showBackupCodeDialog()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+
+    private fun showBackupCodeDialog() {
+        val editText = android.widget.EditText(requireContext()).apply {
+            hint = "Enter backup code"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT
+            setPadding(48, 32, 48, 32)
+            setTextColor(resources.getColor(R.color.color_on_surface, null))
+            setHintTextColor(resources.getColor(R.color.color_on_surface_variant, null))
+        }
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Enter Backup Code")
+            .setMessage("Enter one of your backup codes to verify your identity.")
+            .setView(editText)
+            .setPositiveButton("Verify") { _, _ ->
+                val code = editText.text.toString().trim()
+                if (code.isEmpty()) {
+                    Toast.makeText(requireContext(), "Please enter a backup code", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                verifyBackupCode(code)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun verifyBackupCode(code: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val db = com.securevault.app.data.DatabaseModule.provideDatabase(requireContext())
+                val storedHashes = withContext(Dispatchers.IO) {
+                    val cursor = db.openHelper.readableDatabase
+                        .query("SELECT backup_code_hashes FROM users LIMIT 1")
+                    cursor.use {
+                        if (it.moveToFirst()) it.getString(0) ?: "" else ""
+                    }
+                }
+
+                if (storedHashes.isEmpty()) {
+                    Toast.makeText(requireContext(), "No backup codes configured", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                // Hash the input code and check against stored hashes
+                val codeHash = com.securevault.app.security.SecurityQuestionHasher.normalize(code)
+                val digest = java.security.MessageDigest.getInstance("SHA-256")
+                val inputHash = digest.digest(codeHash.toByteArray())
+                    .joinToString("") { "%02x".format(it) }
+
+                val hashes = storedHashes.split(",")
+                if (hashes.any { it.trim() == inputHash }) {
+                    Toast.makeText(requireContext(), "Backup code verified!", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(requireContext(),
+                        com.securevault.app.ui.onboarding.SecurityQuestionActivity::class.java)
+                    intent.putExtra("is_change", true)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(requireContext(), "Invalid backup code", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Delete Account
+    // -------------------------------------------------------------------------
+
+    private fun setupDeleteAccount(view: View) {
+        view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_delete_account)?.setOnClickListener {
+            // First confirmation
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Delete Account")
+                .setMessage("This will permanently delete ALL your data including passwords, categories, and settings. This action cannot be undone.\n\nAre you sure?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete Everything") { _, _ ->
+                    // Second confirmation with typed "DELETE"
+                    showDeleteConfirmation()
+                }
+                .show()
+        }
+    }
+
+    private fun showDeleteConfirmation() {
+        val editText = android.widget.EditText(requireContext()).apply {
+            hint = "Type DELETE to confirm"
+            setPadding(48, 32, 48, 32)
+            setTextColor(resources.getColor(R.color.color_on_surface, null))
+            setHintTextColor(resources.getColor(R.color.color_on_surface_variant, null))
+        }
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Final Confirmation")
+            .setMessage("Type DELETE to permanently erase your account.")
+            .setView(editText)
+            .setPositiveButton("Confirm Delete") { _, _ ->
+                if (editText.text.toString().trim().uppercase() == "DELETE") {
+                    performAccountDeletion()
+                } else {
+                    Toast.makeText(requireContext(), "Please type DELETE to confirm", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun performAccountDeletion() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // 1. Clear ALL local database tables
+                val db = com.securevault.app.data.DatabaseModule.provideDatabase(requireContext())
+                withContext(Dispatchers.IO) {
+                    db.openHelper.writableDatabase.execSQL("DELETE FROM vault_passwords")
+                    db.openHelper.writableDatabase.execSQL("DELETE FROM categories")
+                    db.openHelper.writableDatabase.execSQL("DELETE FROM password_history")
+                    db.openHelper.writableDatabase.execSQL("DELETE FROM sync_queue")
+                    db.openHelper.writableDatabase.execSQL("DELETE FROM device_sessions")
+                    db.openHelper.writableDatabase.execSQL("DELETE FROM users")
+                }
+
+                // 2. Delete ALL Keystore keys
+                com.securevault.app.security.KeystoreManager.deleteKey(
+                    com.securevault.app.security.KeystoreManager.VMK_KEY_ALIAS
+                )
+                try {
+                    com.securevault.app.security.KeystoreManager.deleteKey("securevault_db_key")
+                } catch (_: Exception) {}
+                try {
+                    com.securevault.app.security.KeystoreManager.deleteKey("securevault_biometric_key")
+                } catch (_: Exception) {}
+
+                // 3. Clear ALL SharedPreferences
+                requireContext().getSharedPreferences("securevault_prefs", android.content.Context.MODE_PRIVATE)
+                    .edit().clear().apply()
+
+                // 4. Clear session token
+                com.securevault.app.data.api.SessionStore.clearToken()
+
+                // 5. Sign out Firebase
+                com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+
+                Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_LONG).show()
+
+                // 6. Navigate to login
+                val intent = Intent(requireContext(),
+                    com.securevault.app.ui.onboarding.LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                activity?.finish()
+
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error deleting account: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     private fun performLogout() {

@@ -147,6 +147,15 @@ class SecurityQuestionActivity : AppCompatActivity() {
                 )
                 AuthApiService.setupSecurityQuestion(request)
 
+                // Also save hash to local DB for offline verification (Export)
+                withContext(Dispatchers.IO) {
+                    val db = com.securevault.app.data.DatabaseModule.provideDatabase(this@SecurityQuestionActivity)
+                    db.openHelper.writableDatabase.execSQL(
+                        "UPDATE users SET security_answer_hash = ?, security_question_id = ? WHERE id = (SELECT id FROM users LIMIT 1)",
+                        arrayOf(answerHash, questionId)
+                    )
+                }
+
                 // Save question text locally for future challenge screens
                 getSharedPreferences("securevault_prefs", MODE_PRIVATE)
                     .edit()
