@@ -40,6 +40,12 @@
         <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
     </style>
 
+    <!-- Nav bar active indicator — taller pill -->
+    <style name="Widget.SecureVault.NavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:height">36dp</item>
+        <item name="android:color">#332D41</item>
+    </style>
+
     <!-- Bottom sheet overlay — rounded corners, dark surface -->
     <style name="ThemeOverlay.SecureVault.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/Widget.SecureVault.BottomSheet</item>

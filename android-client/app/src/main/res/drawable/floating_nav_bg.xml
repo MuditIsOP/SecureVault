@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Floating nav bar background — frosted glass effect, high opacity -->
+<!-- Floating nav bar — frosted glass, slightly lighter than background -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners android:radius="28dp" />
-    <!-- High opacity frosted glass — NOT transparent -->
-    <solid android:color="#F01C1B1F" />
+    <!-- Slightly lighter than #141218 background to show as frosted layer -->
+    <solid android:color="#E8252230" />
     <stroke
         android:width="1dp"
-        android:color="#20D0BCFF" />
+        android:color="#18D0BCFF" />
 </shape>
