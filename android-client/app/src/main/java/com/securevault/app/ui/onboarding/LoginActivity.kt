@@ -327,11 +327,22 @@ class LoginActivity : AppCompatActivity() {
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     startActivity(intent)
                 } else {
-                    // No local PIN (new device or logged out) — verify security question first
-                    val intent = Intent(this@LoginActivity, PinCreateActivity::class.java)
-                    intent.putExtra("require_security_question", true)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
+                    // No local PIN — check if we have a security question set up locally
+                    val hasSecurityQuestion = getSharedPreferences("securevault_prefs", MODE_PRIVATE)
+                        .getString("security_question_text", "")?.isNotEmpty() == true
+
+                    if (hasSecurityQuestion) {
+                        // Logged out or new device — verify security question, then create PIN
+                        val intent = Intent(this@LoginActivity, PinCreateActivity::class.java)
+                        intent.putExtra("require_security_question", true)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                    } else {
+                        // Account was deleted/fresh install — full onboarding
+                        val intent = Intent(this@LoginActivity, SecurityQuestionActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                    }
                 }
                 finish()
             }
