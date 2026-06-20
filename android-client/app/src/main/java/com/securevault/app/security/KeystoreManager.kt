@@ -212,4 +212,16 @@ object KeystoreManager {
             generateDatabaseKey()
         }
     }
+
+    /**
+     * Returns the VMK key, generating a new one if it doesn't exist.
+     * Safe to call anywhere — ensures VMK key is always available.
+     */
+    fun getOrCreateVmkKey(): SecretKey {
+        return if (keyExists(VMK_KEY_ALIAS)) {
+            getKey(VMK_KEY_ALIAS)
+        } else {
+            generateVmkWrappingKey()
+        }
+    }
 }

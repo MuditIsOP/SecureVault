@@ -236,7 +236,7 @@ class AddCredentialBottomSheet : BottomSheetDialogFragment() {
      */
     private fun encryptPassword(plaintext: String): String {
         // Try with existing key
-        val existingKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+        val existingKey = KeystoreManager.getOrCreateVmkKey()
         if (existingKey != null) {
             try {
                 return CryptographyHelper.encrypt(plaintext, existingKey)

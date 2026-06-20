@@ -178,7 +178,7 @@ class AddEditCredentialActivity : AppCompatActivity() {
 
             // Decrypt password for edit field — SRS FR-VAULT-02
             try {
-                val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+                val vmkKey = KeystoreManager.getOrCreateVmkKey()
                 if (vmkKey != null) {
                     val decrypted = CryptographyHelper.decrypt(
                         credential.encryptedPassword, vmkKey
@@ -234,7 +234,7 @@ class AddEditCredentialActivity : AppCompatActivity() {
                     val userId = getCurrentUserId()
 
                     // PRD F-VAULT-02 AC#2 — encrypt via AES-256 using VMK
-                    val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+                    val vmkKey = KeystoreManager.getOrCreateVmkKey()
                         ?: throw IllegalStateException("VMK key not available")
 
                     val encryptedPassword = CryptographyHelper.encrypt(password, vmkKey)

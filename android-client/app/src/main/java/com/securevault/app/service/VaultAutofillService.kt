@@ -343,7 +343,7 @@ class VaultAutofillService : AutofillService() {
             // Decrypt password on-the-fly for autofill
             if (fields.passwordId != null) {
                 try {
-                    val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+                    val vmkKey = KeystoreManager.getOrCreateVmkKey()
                     val decryptedPassword = if (vmkKey != null) {
                         CryptographyHelper.decrypt(credential.encryptedPassword, vmkKey)
                     } else {

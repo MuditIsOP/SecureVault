@@ -406,7 +406,7 @@ class ExportActivity : AppCompatActivity() {
 
         // Decrypt all passwords in memory — Security_Requirements.md RESTRICTED
         val decryptedPasswords = withContext(Dispatchers.IO) {
-            val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+            val vmkKey = KeystoreManager.getOrCreateVmkKey()
             val map = mutableMapOf<String, String>()
             if (vmkKey != null) {
                 for (credential in credentials) {

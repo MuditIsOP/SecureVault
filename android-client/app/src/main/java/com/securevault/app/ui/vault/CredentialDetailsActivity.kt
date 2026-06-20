@@ -283,7 +283,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
                             isHistoryRevealed = false
                         } else {
                             try {
-                                val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+                                val vmkKey = KeystoreManager.getOrCreateVmkKey()
                                     ?: throw IllegalStateException("VMK key not available")
                                 val decrypted = CryptographyHelper.decrypt(
                                     entry.encryptedPassword, vmkKey
@@ -379,7 +379,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
         val credential = currentCredential ?: return
 
         try {
-            val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+            val vmkKey = KeystoreManager.getOrCreateVmkKey()
                 ?: throw IllegalStateException("VMK key not available")
 
             decryptedPassword = CryptographyHelper.decrypt(
@@ -422,7 +422,7 @@ class CredentialDetailsActivity : AppCompatActivity() {
         val credential = currentCredential ?: return
 
         try {
-            val vmkKey = KeystoreManager.getKey(KeystoreManager.VMK_KEY_ALIAS)
+            val vmkKey = KeystoreManager.getOrCreateVmkKey()
                 ?: throw IllegalStateException("VMK key not available")
 
             val password = CryptographyHelper.decrypt(
