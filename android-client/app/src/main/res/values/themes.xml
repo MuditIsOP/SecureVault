@@ -14,7 +14,7 @@
         <!-- Secondary colors -->
         <item name="colorSecondary">@color/color_secondary</item>
         <item name="colorOnSecondary">#332D41</item>
-        <item name="colorSecondaryContainer">#4A4458</item>
+        <item name="colorSecondaryContainer">#332D41</item>
         <item name="colorOnSecondaryContainer">#E8DEF8</item>
 
         <!-- Surface colors — Design.md §2.1 -->
@@ -33,18 +33,11 @@
 
         <!-- Status bar / Navigation bar — transparent for floating nav -->
         <item name="android:statusBarColor">@color/color_background</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/color_background</item>
         <item name="android:windowLightStatusBar">false</item>
 
         <!-- Material 3 text fields -->
         <item name="textInputStyle">@style/Widget.Material3.TextInputLayout.OutlinedBox</item>
-    </style>
-
-    <!-- Custom active indicator for floating bottom nav — compact pill -->
-    <style name="Widget.SecureVault.BottomNav.ActiveIndicator" parent="">
-        <item name="android:width">48dp</item>
-        <item name="android:height">32dp</item>
-        <item name="android:color">#40D0BCFF</item>
     </style>
 
     <!-- Bottom sheet overlay — rounded corners, dark surface -->
